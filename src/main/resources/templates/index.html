@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>대시보드</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">대시보드</h1>
+    </div>
+
+    <p class="text-gray-700 mb-4">
+        <strong sec:authentication="principal.name">사용자</strong>님, 환영합니다.
+    </p>
+
+    <!-- 강사 바로가기 (통계 카드·차트는 I6에서 추가) -->
+    <div class="row" sec:authorize="hasRole('INSTRUCTOR')">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <a th:href="@{/instructor/courses}" class="text-decoration-none">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">강좌 관리</div>
+                                <div class="small text-gray-700">강좌 개설 · 과제 등록 · 수강생 확인</div>
+                            </div>
+                            <div class="col-auto"><i class="fas fa-chalkboard-teacher fa-2x text-gray-300"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <a th:href="@{/instructor/stats}" class="text-decoration-none">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">통계</div>
+                                <div class="small text-gray-700">제출률 · 평균 점수 · 미제출자</div>
+                            </div>
+                            <div class="col-auto"><i class="fas fa-chart-bar fa-2x text-gray-300"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- 학생 바로가기 (내 통계 카드는 S5에서 추가) -->
+    <div class="row" sec:authorize="hasRole('STUDENT')">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <a th:href="@{/student/courses/join}" class="text-decoration-none">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">수강 등록</div>
+                                <div class="small text-gray-700">참여코드로 강좌에 등록</div>
+                            </div>
+                            <div class="col-auto"><i class="fas fa-key fa-2x text-gray-300"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <a th:href="@{/student/assignments}" class="text-decoration-none">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">내 과제</div>
+                                <div class="small text-gray-700">예정 · 진행중 · 마감 과제 확인</div>
+                            </div>
+                            <div class="col-auto"><i class="fas fa-tasks fa-2x text-gray-300"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <a th:href="@{/student/submissions}" class="text-decoration-none">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">내 제출</div>
+                                <div class="small text-gray-700">점수 · 피드백 확인</div>
+                            </div>
+                            <div class="col-auto"><i class="fas fa-file-alt fa-2x text-gray-300"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
