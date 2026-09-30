@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title th:text="${course.name}">강좌 상세</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800" th:text="${course.name}">강좌명</h1>
+        <a th:href="@{/instructor/courses}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 강좌 목록
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- 참여코드: 학생이 S1 수강 등록에서 입력 -->
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-2">참여코드</div>
+                    <div class="d-flex align-items-center">
+                        <span id="joinCode" class="h3 mb-0 font-weight-bold text-gray-800 mr-3"
+                              style="letter-spacing: 0.15em" th:text="${course.joinCode}">ABCD2345</span>
+                        <button type="button" id="copyJoinCode" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-copy fa-sm"></i> 복사
+                        </button>
+                    </div>
+                    <div class="small text-gray-500 mt-2">학생은 [수강 등록] 메뉴에서 이 코드를 입력합니다.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-2">개설일시</div>
+                    <div class="h5 mb-0 text-gray-800"
+                         th:text="${#temporals.format(course.createdAt, 'yyyy-MM-dd HH:mm')}">2026-09-30 10:00</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        $('#copyJoinCode').on('click', function () {
+            const code = $('#joinCode').text().trim();
+            navigator.clipboard.writeText(code).then(() => {
+                $(this).html('<i class="fas fa-check fa-sm"></i> 복사됨');
+                setTimeout(() => $(this).html('<i class="fas fa-copy fa-sm"></i> 복사'), 1500);
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>
