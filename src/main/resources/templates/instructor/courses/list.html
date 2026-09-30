@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>강좌 관리</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css">
+</head>
+<body>
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">강좌 관리</h1>
+
+    <!-- I1 강좌 개설 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">새 강좌 개설</h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/instructor/courses}" th:object="${courseForm}" method="post" novalidate>
+                <div class="form-row align-items-start">
+                    <div class="col-md-8 mb-2">
+                        <input type="text" th:field="*{name}" class="form-control" th:errorclass="is-invalid"
+                               placeholder="강좌명 (예: 자바 스프링 웹 개발)" maxlength="100">
+                        <div class="invalid-feedback" th:errors="*{name}"></div>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-plus fa-sm mr-1"></i> 개설하고 참여코드 발급
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 내 강좌 목록 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                내 강좌 <span class="badge badge-primary ml-1" th:text="${#lists.size(courses)}">0</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(courses)}" class="text-center text-gray-500 py-4">
+                아직 개설한 강좌가 없습니다. 위에서 첫 강좌를 개설해 보세요.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(courses)}">
+                <table class="table table-bordered table-hover" id="courseTable" width="100%">
+                    <thead>
+                    <tr>
+                        <th>강좌명</th>
+                        <th style="width: 160px">참여코드</th>
+                        <th style="width: 180px">개설일시</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="course : ${courses}">
+                        <td>
+                            <a th:href="@{/instructor/courses/{id}(id=${course.id})}" th:text="${course.name}">강좌명</a>
+                        </td>
+                        <td><code class="h6" th:text="${course.joinCode}">ABCD2345</code></td>
+                        <td th:text="${#temporals.format(course.createdAt, 'yyyy-MM-dd HH:mm')}">2026-09-30 10:00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+    <!-- th:inline="none": DataTables의 order 이중 대괄호를 Thymeleaf 인라인 표현식으로 해석하지 않도록 -->
+    <script th:inline="none">
+        $(function () {
+            $('#courseTable').DataTable({
+                order: [[2, 'desc']],
+                language: {
+                    search: '검색:',
+                    lengthMenu: '_MENU_ 개씩 보기',
+                    info: '전체 _TOTAL_개 중 _START_-_END_',
+                    infoEmpty: '0개',
+                    infoFiltered: '(전체 _MAX_개 중 검색)',
+                    zeroRecords: '검색 결과가 없습니다.',
+                    paginate: {previous: '이전', next: '다음'}
+                }
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>
