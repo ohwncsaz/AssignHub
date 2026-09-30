@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: assignhub
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/assignhub
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+    show-sql: true
+
+  thymeleaf:
+    cache: false
+
+server:
+  error:
+    whitelabel:
+      enabled: false
+
+# U4 초기 강사 계정 (개발용 기본값, 운영에서는 환경변수로 덮어쓰기)
+app:
+  instructor:
+    email: ${INSTRUCTOR_EMAIL:instructor@test.com}
+    password: ${INSTRUCTOR_PASSWORD:password123}
+    name: ${INSTRUCTOR_NAME:김강사}

@@ -1,0 +1,15 @@
+# 테스트는 PostgreSQL 없이 H2 인메모리 DB로 실행
+spring:
+  datasource:
+    url: jdbc:h2:mem:assignhub;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+app:
+  instructor:
+    email: instructor@test.com
+    password: test-instructor-pw
+    name: 테스트강사

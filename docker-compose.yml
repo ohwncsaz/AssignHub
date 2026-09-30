@@ -1,0 +1,17 @@
+# 로컬 개발용 PostgreSQL — application.yaml의 기본 접속 정보와 동일
+services:
+  postgres:
+    image: postgres:16
+    container_name: assignhub-db
+    environment:
+      POSTGRES_DB: assignhub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      TZ: Asia/Seoul
+    ports:
+      - "5432:5432"
+    volumes:
+      - assignhub-data:/var/lib/postgresql/data
+
+volumes:
+  assignhub-data:
