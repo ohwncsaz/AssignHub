@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/auth}">
+<head>
+    <title>로그인</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-xl-5 col-lg-6 col-md-8">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-5">
+                    <div class="text-center">
+                        <h1 class="h4 text-gray-900 mb-4">AssignHub 로그인</h1>
+                    </div>
+
+                    <div th:if="${param.error}" class="alert alert-danger small">
+                        이메일 또는 비밀번호가 올바르지 않습니다.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-info small">
+                        로그아웃되었습니다.
+                    </div>
+                    <div th:if="${successMessage}" class="alert alert-success small" th:text="${successMessage}"></div>
+
+                    <!-- th:action을 쓰면 CSRF 토큰 hidden input이 자동으로 추가된다 -->
+                    <form class="user" th:action="@{/login}" method="post">
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-control form-control-user"
+                                   placeholder="이메일" required autofocus>
+                        </div>
+                        <div class="form-group">
+                            <input type="password" name="password" class="form-control form-control-user"
+                                   placeholder="비밀번호" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-user btn-block">로그인</button>
+                    </form>
+
+                    <hr>
+                    <div class="text-center">
+                        <a class="small" th:href="@{/signup}">계정이 없나요? 학생 회원가입</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
