@@ -35,6 +35,8 @@ server:
 
 # U4 초기 강사 계정 (개발용 기본값, 운영에서는 환경변수로 덮어쓰기)
 app:
+  # 로그인 상태 유지(remember-me) 쿠키 서명 키 — 운영에서는 환경변수로 반드시 변경
+  remember-me-key: ${REMEMBER_ME_KEY:assignhub-local-dev-remember-me-key}
   # 첨부파일 저장 폴더 (git에는 올리지 않음)
   upload-dir: ${UPLOAD_DIR:./uploads}
   instructor:

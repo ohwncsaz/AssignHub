@@ -60,7 +60,7 @@ class AuthFlowTest {
     void loginPage_renders() throws Exception {
         mockMvc.perform(get("/login"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(Matchers.containsString("AssignHub 로그인")));
+                .andExpect(content().string(Matchers.containsString("AssignHub에 오신 것을 환영합니다!")));
     }
 
     @Test

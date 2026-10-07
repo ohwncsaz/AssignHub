@@ -7,42 +7,58 @@
     <title>로그인</title>
 </head>
 <body>
+<!-- SB Admin 2 원본 login.html 구조: 큰 카드 안에 왼쪽 그림(bg-login-image) + 오른쪽 폼 -->
+<!-- 원본의 Google · Facebook 로그인, 비밀번호 찾기는 기능이 없어 제외 -->
 <div layout:fragment="content">
     <div class="row justify-content-center">
-        <div class="col-xl-5 col-lg-6 col-md-8">
+        <div class="col-xl-10 col-lg-12 col-md-9">
             <div class="card o-hidden border-0 shadow-lg my-5">
-                <div class="card-body p-5">
-                    <div class="text-center">
-                        <h1 class="h4 text-gray-900 mb-4">AssignHub 로그인</h1>
-                    </div>
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">AssignHub에 오신 것을 환영합니다!</h1>
+                                </div>
 
-                    <div th:if="${param.error}" class="alert alert-danger small">
-                        이메일 또는 비밀번호가 올바르지 않습니다.
-                    </div>
-                    <div th:if="${param.logout}" class="alert alert-info small">
-                        로그아웃되었습니다.
-                    </div>
-                    <div th:if="${param.expired}" class="alert alert-warning small">
-                        세션이 만료되었습니다. 다시 로그인해 주세요.
-                    </div>
-                    <div th:if="${successMessage}" class="alert alert-success small" th:text="${successMessage}"></div>
+                                <div th:if="${param.error}" class="alert alert-danger small">
+                                    이메일 또는 비밀번호가 올바르지 않습니다.
+                                </div>
+                                <div th:if="${param.logout}" class="alert alert-info small">
+                                    로그아웃되었습니다.
+                                </div>
+                                <div th:if="${param.expired}" class="alert alert-warning small">
+                                    세션이 만료되었습니다. 다시 로그인해 주세요.
+                                </div>
+                                <div th:if="${successMessage}" class="alert alert-success small" th:text="${successMessage}"></div>
 
-                    <!-- th:action을 쓰면 CSRF 토큰 hidden input이 자동으로 추가된다 -->
-                    <form class="user" th:action="@{/login}" method="post">
-                        <div class="form-group">
-                            <input type="email" name="email" class="form-control form-control-user"
-                                   placeholder="이메일" required autofocus>
+                                <!-- th:action을 쓰면 CSRF 토큰 hidden input이 자동으로 추가된다 -->
+                                <form class="user" th:action="@{/login}" method="post">
+                                    <div class="form-group">
+                                        <input type="email" name="email" class="form-control form-control-user"
+                                               placeholder="이메일 주소" required autofocus>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" name="password" class="form-control form-control-user"
+                                               placeholder="비밀번호" required>
+                                    </div>
+                                    <!-- 원본의 Remember Me — Spring Security remember-me로 실제 동작 (14일) -->
+                                    <div class="form-group">
+                                        <div class="custom-control custom-checkbox small">
+                                            <input type="checkbox" class="custom-control-input" id="rememberMe" name="remember-me">
+                                            <label class="custom-control-label" for="rememberMe">로그인 상태 유지</label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">로그인</button>
+                                </form>
+
+                                <hr>
+                                <div class="text-center">
+                                    <a class="small" th:href="@{/signup}">계정이 없나요? 학생 회원가입</a>
+                                </div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <input type="password" name="password" class="form-control form-control-user"
-                                   placeholder="비밀번호" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-user btn-block">로그인</button>
-                    </form>
-
-                    <hr>
-                    <div class="text-center">
-                        <a class="small" th:href="@{/signup}">계정이 없나요? 학생 회원가입</a>
                     </div>
                 </div>
             </div>
