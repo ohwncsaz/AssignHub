@@ -113,12 +113,13 @@ class UiPolishTest {
     }
 
     @Test
-    @DisplayName("사이드바: 아직 없는 메뉴(통계 I6)는 '준비 중'으로 비활성화, 구현된 내 제출(S4)은 링크로 열린다")
-    void sidebar_unbuiltMenusDisabled() throws Exception {
+    @DisplayName("사이드바: 모든 메뉴가 구현되어 '준비 중' 없이 통계(I6) · 내 제출(S4)이 링크로 열린다")
+    void sidebar_allMenusEnabled() throws Exception {
         mockMvc.perform(get("/").with(user(instructor)))
-                .andExpect(content().string(Matchers.containsString("준비 중")))
-                .andExpect(content().string(Matchers.not(Matchers.containsString("href=\"/instructor/stats\""))));
+                .andExpect(content().string(Matchers.not(Matchers.containsString("준비 중"))))
+                .andExpect(content().string(Matchers.containsString("href=\"/instructor/stats\"")));
         mockMvc.perform(get("/").with(user(student)))
+                .andExpect(content().string(Matchers.not(Matchers.containsString("준비 중"))))
                 .andExpect(content().string(Matchers.containsString("href=\"/student/submissions\"")));
     }
 

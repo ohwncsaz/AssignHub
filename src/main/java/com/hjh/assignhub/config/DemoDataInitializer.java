@@ -98,8 +98,11 @@ public class DemoDataInitializer implements ApplicationRunner {
                 "제출 기간 검증(B1)과 재제출(B3)을 구현하세요.",
                 now.plusDays(3), now.plusDays(10).withHour(23).withMinute(59), 100);
 
-        submissionRepository.save(new Submission(closed, students.get(0), "회원가입 구현했습니다. 깃허브 링크 첨부합니다.", null));
-        submissionRepository.save(new Submission(closed, students.get(1), "중복 이메일 검사까지 완료했습니다.", null));
+        // 마감된 과제는 채점까지 끝난 상태 — 통계(I6 · S5)의 평균 점수 · 결과 확인(S4)을 바로 시연할 수 있게
+        Submission first = submissionRepository.save(new Submission(closed, students.get(0), "회원가입 구현했습니다. 깃허브 링크 첨부합니다.", null));
+        first.grade(90, "검증 로직까지 잘 구현했어요. 비밀번호 확인 메시지만 다듬어 보세요.");
+        Submission second = submissionRepository.save(new Submission(closed, students.get(1), "중복 이메일 검사까지 완료했습니다.", null));
+        second.grade(75, "기능은 동작합니다. 예외 상황 테스트를 추가해 보세요.");
         submissionRepository.save(new Submission(open, students.get(0), "로그인 구현 중간 제출합니다.", null));
 
         log.info("데모 데이터 생성: 강좌 [{}] 참여코드 {}, 학생 {}명(데모 비밀번호는 README 참고)",
