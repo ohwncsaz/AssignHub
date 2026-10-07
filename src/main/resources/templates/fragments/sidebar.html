@@ -30,7 +30,7 @@
 
         <!-- 과제 등록·수정, 수강생 추가도 강좌 관리 아래 화면이므로 같이 강조 -->
         <li class="nav-item"
-            th:classappend="${#strings.startsWith(path, '/instructor/courses') or #strings.startsWith(path, '/instructor/assignments')} ? 'active'">
+            th:classappend="${#strings.startsWith(path, '/instructor/courses') or #strings.startsWith(path, '/instructor/assignments') or #strings.startsWith(path, '/instructor/submissions')} ? 'active'">
             <a class="nav-link" th:href="@{/instructor/courses}">
                 <i class="fas fa-fw fa-chalkboard-teacher"></i>
                 <span>강좌 관리</span>

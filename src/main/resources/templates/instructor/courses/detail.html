@@ -135,7 +135,8 @@
                             <th:block th:replace="~{fragments/assignment :: statusBadge(${a})}"></th:block>
                         </td>
                         <td>
-                            <span th:text="${a.title}">과제 제목</span>
+                            <!-- 제목을 누르면 I4 제출 현황 (제출자 · 미제출자 · 채점) -->
+                            <a th:href="@{/instructor/assignments/{id}/submissions(id=${a.id})}" th:text="${a.title}">과제 제목</a>
                             <a th:if="${a.filePath != null}" th:href="@{/instructor/assignments/{id}/file(id=${a.id})}"
                                class="ml-1 text-gray-500" th:title="${a.fileName}">
                                 <i class="fas fa-paperclip fa-sm"></i>

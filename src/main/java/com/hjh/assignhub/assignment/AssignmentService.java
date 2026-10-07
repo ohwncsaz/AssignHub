@@ -47,6 +47,13 @@ public class AssignmentService {
         Assignment assignment = getMyAssignment(assignmentId, instructorId); // B5
         validatePeriod(form);                                                 // B7
 
+        // B6 유지 — 이미 채점한 최고 점수보다 배점을 낮추면 "점수 ≤ 배점"이 깨지므로 막는다
+        Integer maxGivenScore = submissionRepository.findMaxScoreByAssignmentId(assignmentId);
+        if (maxGivenScore != null && form.getMaxScore() < maxGivenScore) {
+            throw new FormFieldException("maxScore",
+                    "이미 " + maxGivenScore + "점으로 채점된 제출물이 있어 배점을 " + maxGivenScore + "점보다 낮출 수 없습니다.");
+        }
+
         assignment.update(form.getTitle().trim(), form.getContent(),
                 form.getStartAt(), form.getEndAt(), form.getMaxScore());
 
