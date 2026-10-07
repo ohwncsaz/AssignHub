@@ -37,6 +37,14 @@ public class CourseService {
         return courseRepository.findByInstructorIdOrderByCreatedAtDesc(instructorId);
     }
 
+    // 참여코드 재발급 — 코드가 유출됐을 때 사용
+    @Transactional
+    public String regenerateJoinCode(Long courseId, Long instructorId) {
+        Course course = getMyCourse(courseId, instructorId);
+        course.changeJoinCode(newJoinCode());
+        return course.getJoinCode();
+    }
+
     // 본인 강좌만 조회 가능 — 다른 강사의 강좌 id를 주소창에 넣어도 403
     public Course getMyCourse(Long courseId, Long instructorId) {
         Course course = courseRepository.findById(courseId)

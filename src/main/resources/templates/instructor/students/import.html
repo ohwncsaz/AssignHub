@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>엑셀로 학생 추가</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">엑셀로 학생 추가</h1>
+            <div class="small text-gray-600" th:text="${course.name}">강좌명</div>
+        </div>
+        <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 강좌로 돌아가기
+        </a>
+    </div>
+
+    <!-- 업로드 -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <ol class="small text-gray-700 pl-3">
+                <li class="mb-1">
+                    <a th:href="@{/instructor/courses/{id}/students/template(id=${course.id})}">
+                        <i class="fas fa-download fa-sm"></i> 양식 파일(.xlsx)</a>을 내려받아
+                    <strong>학번 · 이름 · 이메일</strong>을 2행부터 입력하세요.
+                </li>
+                <li class="mb-1">가입한 학생은 기존 계정으로 등록, 가입하지 않은 학생은 계정을 만들어 등록합니다. (초기 비밀번호 = 학번)</li>
+                <li>한 줄이 실패해도 나머지 줄은 등록되며, 줄별 결과가 아래에 표시됩니다. 한 번에 최대 300명.</li>
+            </ol>
+            <form th:action="@{/instructor/courses/{id}/students/import(id=${course.id})}" method="post"
+                  enctype="multipart/form-data" novalidate>
+                <div class="form-row align-items-start">
+                    <div class="col-md-8 mb-2">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file" name="file" accept=".xlsx"
+                                   th:classappend="${fileError != null} ? 'is-invalid'">
+                            <label class="custom-file-label" for="file">엑셀 파일 선택 (.xlsx)</label>
+                            <div class="invalid-feedback" th:text="${fileError}">에러</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <button type="submit" class="btn btn-info btn-block">
+                            <i class="fas fa-upload fa-sm mr-1"></i> 업로드하고 추가
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 결과 -->
+    <div class="card shadow mb-4" th:if="${results != null}">
+        <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">처리 결과 <span class="text-gray-600" th:text="|(${#lists.size(results)}줄)|">(3줄)</span></h6>
+            <div>
+                <span th:each="o : ${outcomes}" th:if="${counts.get(o) != null}" class="badge mr-1"
+                      th:classappend="'badge-' + ${o.badge}" th:text="|${o.label} ${counts.get(o)}|">계정 생성 후 등록 2</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead>
+                    <tr>
+                        <th style="width: 60px">행</th>
+                        <th style="width: 130px">학번</th>
+                        <th style="width: 120px">이름</th>
+                        <th>이메일</th>
+                        <th style="width: 140px">결과</th>
+                        <th>사유</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${results}" th:classappend="${r.outcome.name() == 'FAILED'} ? 'table-danger'">
+                        <td class="text-center" th:text="${r.rowNumber}">2</td>
+                        <td th:text="${r.studentNo}">20260001</td>
+                        <td th:text="${r.name}">홍길동</td>
+                        <td th:text="${r.email}">hong@example.com</td>
+                        <td><span class="badge" th:classappend="'badge-' + ${r.outcome.badge}"
+                                  th:text="${r.outcome.label}">계정 생성 후 등록</span></td>
+                        <td class="small" th:text="${r.message}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-right">
+                <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-primary btn-sm">수강생 목록 보기</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        $('.custom-file-input').on('change', function () {
+            const name = this.files.length ? this.files[0].name : '엑셀 파일 선택 (.xlsx)';
+            $(this).next('.custom-file-label').text(name);
+        });
+    </script>
+</th:block>
+</body>
+</html>

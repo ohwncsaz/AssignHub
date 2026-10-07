@@ -51,4 +51,9 @@ public class Course {
     public boolean isOwnedBy(Long instructorId) {
         return instructor.getId().equals(instructorId);
     }
+
+    // 참여코드 재발급 — 기존 코드는 더 이상 수강 등록에 쓸 수 없다 (이미 등록한 학생은 그대로)
+    public void changeJoinCode(String joinCode) {
+        this.joinCode = joinCode;
+    }
 }
