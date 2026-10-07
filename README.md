@@ -59,7 +59,7 @@ IntelliJ에서는 실행 설정의 **Active profiles**에 `demo`를 입력합니
   | 20260102 | 이서연 | `demo2@test.com` |
   | 20260103 | 박지호 | `demo3@test.com` |
   | 20260104 | 최수아 | `demo4@test.com` |
-- 과제 4개 — 마감 1 · 진행중 2(그중 1개는 3시간 뒤 마감) · 예정 1, 제출물 3건
+- 과제 4개 — 마감 1 · 진행중 2(그중 1개는 3시간 뒤 마감) · 예정 1, 제출물 3건(마감 과제 2건은 채점 완료 — 통계 · 결과 확인 시연용)
 
 - DB 접속 정보 · 강사 계정 · 첨부파일 폴더는 환경변수로 바꿀 수 있습니다: `DB_USERNAME`, `DB_PASSWORD`, `INSTRUCTOR_EMAIL`, `INSTRUCTOR_PASSWORD`, `INSTRUCTOR_NAME`, `UPLOAD_DIR`(기본 `./uploads`, 10MB 제한)
 - DB 초기화: `docker compose down -v` → `docker compose up -d`
@@ -88,7 +88,7 @@ IntelliJ에서는 실행 설정의 **Active profiles**에 `demo`를 입력합니
 | I3 | 과제 등록 · 수정 · 삭제 | 시작/종료일시 · 배점 · 첨부 | ✅ |
 | I4 | 제출 현황 | 과제별 제출 / 미제출 목록 | ✅ |
 | I5 | 채점 · 피드백 | 점수 + 코멘트 입력 | ✅ |
-| I6 | 통계 대시보드 | 제출률 · 점수 · 미제출자 | ⏳ |
+| I6 | 통계 대시보드 | 제출률 · 점수 · 미제출자 | ✅ |
 
 ### 학생 (STUDENT)
 
@@ -98,7 +98,7 @@ IntelliJ에서는 실행 설정의 **Active profiles**에 `demo`를 입력합니
 | S2 | 내 과제 목록 | 예정 · 진행중 · 마감 배지 | ✅ |
 | S3 | 과제 제출 · 재제출 | 기간 안에서만 · 파일 첨부 | ✅ |
 | S4 | 결과 확인 | 점수 · 피드백 조회 | ✅ |
-| S5 | 내 통계 | 제출률 · 평균 점수 · 마감 임박 | ⏳ |
+| S5 | 내 통계 | 제출률 · 평균 점수 · 마감 임박 | ✅ |
 
 ### 추가 기능 (요구사항 외)
 
@@ -233,16 +233,17 @@ src/main/java/com/hjh/assignhub
 ├── config/      SecurityConfig · 인터셉터 등록 · 강사 초기 계정 · 데모 데이터(demo 프로필)
 ├── course/      강좌 엔티티 · 강좌 개설/참여코드 발급(I1)
 ├── enrollment/  수강 엔티티 · 참여코드 수강 등록(S1) · 수강생 목록(I2) · 수강생 추가/엑셀 대량 추가/내보내기
-├── submission/  제출 엔티티 (제출 · 채점 기능은 W3)
+├── stats/       통계 — 강사 통계 대시보드(I6) · 학생 내 통계(S5), group by 집계 쿼리
+├── submission/  제출 · 재제출(S3) · 제출 현황(I4) · 채점(I5) · 결과 확인(S4)
 └── user/        User 엔티티 · Role · 회원가입 · 프로필 수정 · 비밀번호 변경
 
 src/main/resources/templates
 ├── layout/      default(사이드바 포함) · auth(로그인/가입용)
 ├── fragments/   sidebar · topbar · alerts · assets(CDN)
 ├── auth/        login · signup
-├── instructor/  courses(목록 · 상세) · assignments(등록 · 수정 폼) · students(추가 · 엑셀 추가)
+├── instructor/  courses(목록 · 상세) · assignments(등록 · 수정) · students(추가 · 엑셀) · submissions(제출 현황 · 채점) · stats(통계)
 ├── profile/     프로필 수정 · 비밀번호 변경
-├── student/     courses(수강 등록) · assignments(목록 · 상세)
+├── student/     courses(내 강좌 · 수강 등록) · assignments(목록 · 상세 · 제출) · submissions(내 제출 · 결과)
 ├── error/       403 · 404 · 4xx · 5xx
 └── index.html   역할별 대시보드
 ```

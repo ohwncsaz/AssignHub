@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>통계</title>
+</head>
+<body>
+<!-- I6 통계 대시보드 — SB Admin 2 charts.html 구성(카드 + Chart.js 막대 차트) -->
+<div layout:fragment="content">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">통계</h1>
+        <!-- 강좌 선택 — 바꾸면 바로 다시 조회 -->
+        <form th:if="${!#lists.isEmpty(courses)}" th:action="@{/instructor/stats}" method="get" class="form-inline mt-2 mt-sm-0">
+            <label for="courseId" class="small text-gray-600 mr-2">강좌</label>
+            <select id="courseId" name="courseId" class="custom-select custom-select-sm" onchange="this.form.submit()">
+                <option th:each="c : ${courses}" th:value="${c.id}" th:text="${c.name}"
+                        th:selected="${stats != null and c.id == stats.course.id}">강좌</option>
+            </select>
+        </form>
+    </div>
+
+    <div th:if="${#lists.isEmpty(courses)}" class="card shadow mb-4">
+        <div class="card-body text-center text-gray-500 py-5">
+            <p class="mb-2">아직 개설한 강좌가 없습니다.</p>
+            <a th:href="@{/instructor/courses}" class="small">강좌 관리에서 첫 강좌 개설하기 &rarr;</a>
+        </div>
+    </div>
+
+    <th:block th:if="${stats != null}">
+
+        <!-- 요약 카드 -->
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">수강생</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800"><span th:text="${stats.students}">0</span><small class="h6">명</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">과제</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800"><span th:text="${#lists.size(stats.assignments)}">0</span><small class="h6">개</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">평균 제출률</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800">
+                            <span id="averageSubmissionRate" th:text="${stats.averageSubmissionRate != null} ? |${stats.averageSubmissionRate}%| : '-'">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">평균 점수 (배점 대비)</div>
+                        <div class="h4 mb-0 font-weight-bold text-gray-800">
+                            <span id="averageScoreRate" th:text="${stats.averageScoreRate != null} ? |${stats.averageScoreRate}%| : '-'">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 차트 (시작된 과제만) -->
+        <div class="row" th:unless="${#lists.isEmpty(chartLabels)}">
+            <div class="col-xl-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">과제별 제출률</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-bar"><canvas id="submissionChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6 mb-4">
+                <div class="card shadow h-100">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">과제별 평균 점수 <span class="small text-gray-500">(배점 대비 %)</span></h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-bar"><canvas id="scoreChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(chartLabels)}" class="card shadow mb-4">
+            <div class="card-body text-center text-gray-500 py-4">시작된 과제가 없어 아직 표시할 통계가 없습니다.</div>
+        </div>
+
+        <!-- 과제별 표 -->
+        <div class="card shadow mb-4" th:unless="${#lists.isEmpty(stats.assignments)}">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">과제별 통계</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th class="col-main">과제</th>
+                            <th>상태</th>
+                            <th>제출</th>
+                            <th>채점</th>
+                            <th>평균 점수</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="s : ${stats.assignments}" th:with="a=${s.assignment}">
+                            <td><a th:href="@{/instructor/assignments/{id}/submissions(id=${a.id})}" th:text="${a.title}">과제</a></td>
+                            <td class="text-nowrap"><th:block th:replace="~{fragments/assignment :: statusBadge(${a})}"></th:block></td>
+                            <td class="text-nowrap">
+                                <th:block th:if="${s.started}">
+                                    <span th:text="${s.submitted}">0</span> / <span th:text="${s.students}">0</span>명
+                                    <span class="text-gray-500" th:text="|(${s.submittedRate}%)|">(0%)</span>
+                                </th:block>
+                                <span th:unless="${s.started}" class="text-gray-500">시작 전</span>
+                            </td>
+                            <td class="text-nowrap"><span th:text="${s.graded}">0</span>건</td>
+                            <td class="text-nowrap">
+                                <th:block th:if="${s.averageScore != null}">
+                                    <strong th:text="${s.averageScoreText}">42.5</strong> / <span th:text="${a.maxScore}">50</span>
+                                    <span class="text-gray-500" th:text="|(${s.averageScoreRate}%)|">(85%)</span>
+                                </th:block>
+                                <span th:if="${s.averageScore == null}" class="text-gray-400">-</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 미제출자 (시작된 과제 기준, 미제출이 많은 학생부터) -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-danger">
+                    미제출자 <span class="badge badge-danger ml-1" th:text="${#lists.size(stats.missingStudents)}">0</span>
+                </h6>
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(stats.missingStudents)}" class="text-center text-gray-500 py-3">
+                    시작된 과제를 모든 학생이 제출했습니다.
+                </div>
+                <div class="table-responsive" th:unless="${#lists.isEmpty(stats.missingStudents)}">
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>학번</th>
+                            <th>이름</th>
+                            <th>미제출</th>
+                            <th class="col-main">미제출 과제</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="m : ${stats.missingStudents}">
+                            <td th:text="${m.student.studentNo}">20260001</td>
+                            <td class="text-nowrap" th:text="${m.student.name}">홍길동</td>
+                            <td class="text-nowrap"><span class="badge badge-danger" th:text="|${#lists.size(m.missing)}개|">2개</span></td>
+                            <td>
+                                <span th:each="a : ${m.missing}" class="badge badge-light mr-1 mb-1" th:text="${a.title}">과제</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </th:block>
+</div>
+
+<th:block layout:fragment="scripts">
+    <!-- Chart.js 2.9.4 — SB Admin 2에 포함된 것과 같은 버전 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <!-- th:inline="javascript": 서버 값을 자바스크립트 값으로 안전하게 변환(과제 제목 속 따옴표 등도 이스케이프) -->
+    <script th:if="${stats != null and !#lists.isEmpty(chartLabels)}" th:inline="javascript">
+        const labels = /*[[${chartLabels}]]*/ [];
+        const submissionRates = /*[[${chartSubmissionRates}]]*/ [];
+        const scoreRates = /*[[${chartScoreRates}]]*/ [];
+        const scoreTexts = /*[[${chartScoreTexts}]]*/ [];
+
+        Chart.defaults.global.defaultFontFamily = 'Nunito, -apple-system, system-ui, "Malgun Gothic", sans-serif';
+        Chart.defaults.global.defaultFontColor = '#858796';
+
+        function percentBarChart(canvasId, data, color, tooltipText) {
+            return new Chart(document.getElementById(canvasId), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: color,
+                        hoverBackgroundColor: color,
+                        maxBarThickness: 40
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    legend: {display: false},
+                    scales: {
+                        xAxes: [{gridLines: {display: false}, ticks: {maxRotation: 0, autoSkip: false,
+                            callback: function (label) { return label.length > 10 ? label.substring(0, 10) + '…' : label; }}}],
+                        yAxes: [{ticks: {min: 0, max: 100, stepSize: 20, callback: function (v) { return v + '%'; }}}]
+                    },
+                    tooltips: {
+                        callbacks: {
+                            title: function (items) { return labels[items[0].index]; },
+                            label: function (item) { return tooltipText(item.index); }
+                        }
+                    }
+                }
+            });
+        }
+
+        percentBarChart('submissionChart', submissionRates, '#1cc88a',
+            function (i) { return '제출률 ' + submissionRates[i] + '%'; });
+        percentBarChart('scoreChart', scoreRates, '#f6c23e',
+            function (i) { return scoreRates[i] === null ? '채점 전' : '평균 ' + scoreTexts[i] + ' (' + scoreRates[i] + '%)'; });
+    </script>
+</th:block>
+</body>
+</html>

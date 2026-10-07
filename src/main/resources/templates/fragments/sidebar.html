@@ -36,11 +36,11 @@
                 <span>강좌 관리</span>
             </a>
         </li>
-        <!-- I6 통계(W4)는 아직 없음 — 눌러서 404가 나지 않도록 비활성화 -->
-        <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true" onclick="return false;">
+        <!-- I6 통계 대시보드 -->
+        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/instructor/stats')} ? 'active'">
+            <a class="nav-link" th:href="@{/instructor/stats}">
                 <i class="fas fa-fw fa-chart-bar"></i>
-                <span>통계</span><span class="badge badge-light badge-soon">준비 중</span>
+                <span>통계</span>
             </a>
         </li>
     </th:block>
