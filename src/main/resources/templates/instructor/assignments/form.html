@@ -75,9 +75,16 @@
                         <div class="small text-gray-500">새 파일을 선택하면 기존 첨부가 교체됩니다.</div>
                     </div>
 
+                    <!-- accept는 파일 선택 창의 편의 기능 — 실제 차단은 서버(FileStorage)에서 -->
                     <div class="custom-file">
-                        <input type="file" class="custom-file-input" id="file" name="file">
+                        <input type="file" class="custom-file-input" id="file" name="file"
+                               th:classappend="${#fields.hasErrors('file')} ? 'is-invalid'"
+                               accept=".pdf,.txt,.md,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx,.csv,.zip,.png,.jpg,.jpeg,.gif,.java">
                         <label class="custom-file-label" for="file">파일 선택</label>
+                        <div class="invalid-feedback" th:errors="*{file}"></div>
+                    </div>
+                    <div class="small text-gray-500 mt-1">
+                        허용 형식: pdf, txt, md, doc(x), hwp(x), ppt(x), xls(x), csv, zip, png, jpg, gif, java
                     </div>
                 </div>
 
