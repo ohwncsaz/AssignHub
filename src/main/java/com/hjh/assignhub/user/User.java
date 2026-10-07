@@ -55,4 +55,21 @@ public class User {
     public static User createInstructor(String email, String encodedPassword, String name) {
         return new User(email, encodedPassword, name, null, Role.INSTRUCTOR);
     }
+
+    public boolean isStudent() {
+        return role == Role.STUDENT;
+    }
+
+    // 프로필 수정 — 강사는 학번이 없으므로 학생일 때만 학번을 바꾼다
+    public void updateProfile(String name, String email, String studentNo) {
+        this.name = name;
+        this.email = email;
+        if (isStudent()) {
+            this.studentNo = studentNo;
+        }
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }

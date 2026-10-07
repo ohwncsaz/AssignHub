@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>프로필</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">프로필</h1>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">기본 정보</h6>
+                    <span class="badge" th:classappend="${user.student} ? 'badge-success' : 'badge-primary'"
+                          th:text="${user.student} ? '학생' : '강사'">학생</span>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/profile}" th:object="${profileForm}" method="post" novalidate>
+                        <div class="form-group" th:if="${user.student}">
+                            <label for="studentNo" class="font-weight-bold">학번</label>
+                            <input type="text" th:field="*{studentNo}" class="form-control" th:errorclass="is-invalid"
+                                   inputmode="numeric" maxlength="20">
+                            <div class="invalid-feedback" th:errors="*{studentNo}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold">이름</label>
+                            <input type="text" th:field="*{name}" class="form-control" th:errorclass="is-invalid"
+                                   maxlength="50">
+                            <div class="invalid-feedback" th:errors="*{name}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="font-weight-bold">이메일</label>
+                            <input type="email" th:field="*{email}" class="form-control" th:errorclass="is-invalid"
+                                   maxlength="100">
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                            <small class="form-text text-gray-500">이메일은 로그인 아이디입니다. 바꾸면 다음 로그인부터 새 이메일을 사용하세요.</small>
+                        </div>
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-primary">저장</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">보안</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-gray-600">비밀번호는 현재 비밀번호를 확인한 뒤 변경할 수 있습니다.</p>
+                    <a th:href="@{/profile/password}" class="btn btn-outline-primary btn-block">
+                        <i class="fas fa-key fa-sm mr-1"></i> 비밀번호 변경
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
