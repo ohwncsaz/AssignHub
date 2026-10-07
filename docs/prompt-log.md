@@ -1,0 +1,68 @@
+# Prompt Log
+
+AI 도구(Claude Code)에 요청한 의미 있는 프롬프트와, **AI 결과에서 문제를 찾아 고친 기록**을 남깁니다.
+
+- 요청은 요구사항 ID 단위로 작게 (한 번에 기능 하나, 파일 1~3개 원칙)
+- 생성된 코드는 읽고, 실행하고(테스트), 설명할 수 있을 때만 커밋
+
+### 작성 양식
+
+```
+## YYYY-MM-DD · 요구사항 ID · 한 줄 제목
+- 요청: 어떤 프롬프트를 줬는지
+- AI 결과: AI가 만든 것
+- 문제: 무엇이 틀렸고 어떻게 발견했는지
+- 수정: 어떻게 고쳤는지
+- 배운 점: 다음에 같은 실수를 막으려면
+```
+
+---
+
+## 2026-09-30 · 환경 · Spring Boot 버전과 JDK 버전
+
+- **요청**: Spring Initializr로 생성한 프로젝트에 수업 스택(Security 6, thymeleaf-extras-springsecurity6)을 맞춰 달라.
+- **AI 결과**: 슬라이드가 "Boot 3.x"라서 Boot 4.1.1 → 3.5.16, Gradle 9.7 → 8.14로 내려서 수정했다.
+- **문제**: 나는 Initializr 기본값(Boot 4.1.1)을 쓰기로 했고, Boot 4.1.1도 Layout Dialect와 `extras-springsecurity6` 버전을 자체 관리한다는 것을 BOM에서 확인했다. 또 `build.gradle`의 Java toolchain이 17인데 내 PC에는 JDK 21·25만 있어서 `Cannot find a Java installation ... languageVersion=17` 에러로 Gradle 동기화가 실패했다.
+- **수정**: Boot 4.1.1 · Gradle 9.7.1로 되돌리고, toolchain을 `JavaLanguageVersion.of(21)`로 변경했다.
+- **배운 점**: AI에게 처음부터 "사용 버전(Boot 4.1.1, Java 21)"을 맥락으로 줘야 한다. 맥락이 없으면 AI는 자료에 나온 버전이나 구버전 기준으로 판단한다.
+
+## 2026-09-30 · U2 · Security 7의 로그인 리다이렉트 주소
+
+- **요청**: U1~U4 공통 기능(회원가입·폼 로그인·역할별 메뉴·강사 초기 계정)과 테스트를 작성해 달라.
+- **AI 결과**: "로그인하지 않은 사용자는 로그인 페이지로 이동" 테스트를 `redirectedUrlPattern("**/login")`으로 작성했다.
+- **문제**: 테스트 실행 결과 `Redirected URL '/login' does not match the expected URL pattern '**/login'`으로 실패. 예전 Spring Security는 `http://localhost/login` 같은 절대 URL로 리다이렉트했지만, Security 7(Boot 4)은 상대 경로 `/login`으로 보낸다. 앱 동작은 맞고 테스트의 기대값이 구버전 기준이었다.
+- **수정**: `redirectedUrl("/login")`으로 정확한 값을 검사하도록 변경.
+- **배운 점**: 테스트가 실패하면 "코드가 틀렸나, 기대값이 틀렸나"를 먼저 구분한다. AI가 쓴 테스트도 구버전 지식으로 작성될 수 있다.
+
+## 2026-09-30 · I1 · Thymeleaf가 DataTables 옵션 `[[ ]]`를 표현식으로 해석
+
+- **요청**: I1 강좌 개설 + 참여코드 자동 발급, 강좌 목록은 DataTables로.
+- **AI 결과**: `<script>` 안에 `$('#courseTable').DataTable({ order: [[2, 'desc']] })`를 작성했다.
+- **문제**: 강좌 목록 화면 테스트 2개가 `Could not parse as expression: "2, 'desc'"`로 실패. Thymeleaf는 `[[ ... ]]`를 인라인 표현식 문법으로 쓰기 때문에, 자바스크립트 배열의 이중 대괄호를 자기 문법으로 해석하려다 화면 렌더링 전체가 깨졌다. 테스트가 없었다면 강좌 목록 페이지가 통째로 500 에러였을 것.
+- **수정 1**: 해당 `<script>`에 `th:inline="none"`을 붙여 Thymeleaf가 내용을 해석하지 않게 했다.
+- **수정 2**: 그런데 설명용으로 단 **HTML 주석 안에도** `[[2, 'desc']]`를 적어서 같은 에러로 또 실패했다. Thymeleaf는 주석 안의 인라인 표현식도 처리한다. 주석 문구를 "이중 대괄호"로 바꿔 해결.
+- **배운 점**: Thymeleaf 템플릿에서 `[[ ]]`, `[( )]`는 스크립트·주석 어디에 있든 표현식으로 해석된다. 화면 렌더링 테스트를 꼭 두어야 이런 문제가 커밋 전에 잡힌다.
+
+## 2026-10-07 · S2 · 요구사항 ID별 커밋을 위해 코드 구조 분리
+
+- **요청**: I3(과제 등록·수정·삭제)에 이어 S2(내 과제 목록 + 예정·진행중·마감 배지)를 구현해 달라.
+- **AI 결과**: S2의 학생용 조회 메서드(`findForStudent`, `getForStudent`)를 I3에서 만든 `AssignmentService`, `AssignmentRepository`에 그대로 추가했다.
+- **문제**: 기능은 동작하지만, 한 파일에 I3와 S2 코드가 섞여서 **파일 단위로 `feat: I3 ...` / `feat: S2 ...` 커밋을 나눌 수 없다.** 수업 규칙(커밋 메시지에 요구사항 ID 사용, 기능별 브랜치·PR)을 지킬 수 없는 구조였다.
+- **수정**: I3 파일은 원래대로 되돌리고, 학생 화면 전용 `StudentAssignmentRepository`(조회 전용, `Repository<Assignment, Long>`)와 `StudentAssignmentService`를 새로 만들어 분리. 강사용 코드와 학생용 코드의 책임도 명확해졌다.
+- **배운 점**: AI는 "동작하는 코드"를 기준으로 판단하므로, 프로젝트 규칙(커밋 단위, 브랜치 전략)은 내가 확인하고 요구해야 한다.
+
+## 2026-10-07 · 공통 · 에러 페이지 테스트가 JSON을 받은 이유
+
+- **요청**: 500 에러 시 Tomcat 기본 화면 대신 공통 레이아웃의 안내 화면을 보여 달라. (기존에는 `error/403`, `error/404`만 있었음)
+- **AI 결과**: `templates/error/5xx.html`, `error/4xx.html`과 `/error`를 호출하는 테스트를 작성했다.
+- **문제**: 테스트 2개 실패. 응답이 HTML이 아니라 `{"timestamp":..., "status":500, "error":"Internal Server Error"}` JSON이었다. Spring Boot의 에러 컨트롤러는 요청의 `Accept` 헤더를 보고 HTML/JSON을 고르는데, 테스트 요청에 `Accept: text/html`이 없었다. 브라우저는 항상 이 헤더를 보내므로 실제 화면은 정상이고, 테스트 요청이 현실과 달랐던 것.
+- **수정**: 테스트에 `.accept(MediaType.TEXT_HTML)` 추가. 내부 예외 메시지가 화면에 노출되지 않는지도 함께 검사.
+- **배운 점**: 테스트 요청은 실제 사용자(브라우저) 요청과 같은 조건이어야 의미가 있다.
+
+## 2026-10-07 · I3 · 잘못된 첨부파일 이름이 500 에러가 되던 문제
+
+- **요청**: 첨부파일 확장자 제한(허용 목록)을 추가해 달라.
+- **AI 결과**: 확장자 검사를 넣으려고 기존 `FileStorage`를 다시 보다가, I3 때 AI가 작성한 코드의 버그를 발견했다.
+- **문제**: 파일 이름이 비었거나 잘못된 경우 `FileStorage`가 `BusinessException`을 던지는데, 과제 등록·수정 컨트롤러는 폼 에러용 `FormFieldException`만 잡고 있었다. 그래서 잘못된 파일을 올리면 안내 메시지 대신 **500 에러 화면**이 나왔다. 기존 테스트는 정상 파일만 올렸기 때문에 잡히지 않았다.
+- **수정**: 첨부파일 관련 검증 실패(파일 이름, 확장자)는 모두 `FormFieldException("file", ...)`으로 통일해 폼의 첨부 입력칸 아래에 메시지가 뜨게 했다. `.exe`, `.html`, `.js`, 확장자 없는 파일, 빈 파일 이름을 각각 테스트로 추가.
+- **배운 점**: 예외를 던지는 쪽과 잡는 쪽이 같은 종류의 예외를 약속하고 있는지 확인해야 한다. 테스트는 정상 경로만이 아니라 "잘못된 입력"도 넣어 봐야 이런 빈틈이 보인다.
