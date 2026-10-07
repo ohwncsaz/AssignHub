@@ -23,4 +23,15 @@ public final class FileDownload {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
+
+    // 미리보기 — 내려받지 않고 브라우저 안에서 연다 (이미지 · PDF만 사용)
+    public static ResponseEntity<Resource> inline(Resource resource, String fileName, MediaType mediaType) {
+        ContentDisposition disposition = ContentDisposition.inline()
+                .filename(fileName, StandardCharsets.UTF_8)
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .contentType(mediaType)
+                .body(resource);
+    }
 }

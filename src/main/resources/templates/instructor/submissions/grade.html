@@ -41,6 +41,9 @@
                         <a th:href="@{/instructor/submissions/{id}/file(id=${submission.id})}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-download fa-sm mr-1"></i><span th:text="${submission.fileName}">report.pdf</span>
                         </a>
+                        <!-- 첨부 미리보기 — 내려받지 않고 채점 화면에서 바로 확인 -->
+                        <th:block th:replace="~{fragments/file-preview :: filePreview(${preview},
+                                @{/instructor/submissions/{id}/preview(id=${submission.id})}, ${submission.fileName})}"></th:block>
                     </div>
                 </div>
             </div>

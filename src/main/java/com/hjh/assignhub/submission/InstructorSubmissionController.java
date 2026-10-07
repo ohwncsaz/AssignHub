@@ -1,6 +1,7 @@
 package com.hjh.assignhub.submission;
 
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -10,10 +11,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.hjh.assignhub.auth.LoginUser;
 import com.hjh.assignhub.common.FileDownload;
+import com.hjh.assignhub.common.FilePreviewer;
 import com.hjh.assignhub.common.FileStorage;
 import com.hjh.assignhub.common.FormFieldException;
 
@@ -27,6 +30,7 @@ public class InstructorSubmissionController {
 
     private final GradingService gradingService;
     private final FileStorage fileStorage;
+    private final FilePreviewer filePreviewer;
 
     @GetMapping("/instructor/assignments/{assignmentId}/submissions")
     public String board(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long assignmentId, Model model) {
@@ -38,6 +42,7 @@ public class InstructorSubmissionController {
     public String gradeForm(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long id, Model model) {
         Submission submission = gradingService.getForGrading(id, loginUser.getId()); // B5
         model.addAttribute("submission", submission);
+        model.addAttribute("preview", filePreviewer.previewOf(submission.getFilePath(), submission.getFileName()));
         model.addAttribute("gradeForm", GradeForm.from(submission));
         return "instructor/submissions/grade";
     }
@@ -61,7 +66,18 @@ public class InstructorSubmissionController {
             }
         }
         model.addAttribute("submission", submission);
+        model.addAttribute("preview", filePreviewer.previewOf(submission.getFilePath(), submission.getFileName()));
         return "instructor/submissions/grade";
+    }
+
+    // 제출 첨부 미리보기 (이미지 · PDF를 화면 안에서) — 다운로드와 같은 권한(B5)
+    @GetMapping("/instructor/submissions/{id}/preview")
+    public ResponseEntity<Resource> preview(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long id) {
+        Submission submission = gradingService.getForGrading(id, loginUser.getId()); // B5
+        if (submission.getFilePath() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        return filePreviewer.inline(submission.getFilePath(), submission.getFileName());
     }
 
     @GetMapping("/instructor/submissions/{id}/file")
