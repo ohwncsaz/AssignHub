@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>잘못된 요청</title>
+</head>
+<body>
+<!-- 403 · 404 외의 4xx (400 잘못된 요청, 405 허용되지 않은 메서드 등) -->
+<div layout:fragment="content">
+    <div class="text-center">
+        <div class="error mx-auto" data-text="400" th:attr="data-text=${status}" th:text="${status}">400</div>
+        <p class="lead text-gray-800 mb-4">요청을 처리할 수 없습니다</p>
+        <p class="text-gray-500 mb-4">주소나 입력값을 확인한 뒤 다시 시도해 주세요.</p>
+        <a th:href="@{/}">&larr; 대시보드로 돌아가기</a>
+    </div>
+</div>
+</body>
+</html>
