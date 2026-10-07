@@ -42,6 +42,11 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     // 내 과제 목록의 제출 여부 표시용
     List<Submission> findByStudentId(Long studentId);
 
+    // S4 내 제출 · 결과 — 과제 · 강좌 정보 함께, 최근 제출 순
+    @Query("select s from Submission s join fetch s.assignment a join fetch a.course "
+            + "where s.student.id = :studentId order by s.submittedAt desc")
+    List<Submission> findMySubmissions(@Param("studentId") Long studentId);
+
     // 해당 강좌의 과제 중 이 학생이 제출한 것이 있는지 (수강생 내보내기 검사)
     boolean existsByStudentIdAndAssignmentCourseId(Long studentId, Long courseId);
 }

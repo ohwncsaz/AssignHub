@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>내 제출</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">내 제출</h1>
+
+    <!-- 요약: 제출 · 채점 완료 · 채점 대기 -->
+    <div class="row" th:unless="${#lists.isEmpty(submissions)}">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">제출</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800"><span th:text="${#lists.size(submissions)}">0</span><small class="h6">건</small></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">채점 완료</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800"><span th:text="${gradedCount}">0</span><small class="h6">건</small></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">채점 대기</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800"><span th:text="${#lists.size(submissions) - gradedCount}">0</span><small class="h6">건</small></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">제출물 · 결과</h6>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(submissions)}" class="text-center text-gray-500 py-4">
+                <p class="mb-2">아직 제출한 과제가 없습니다.</p>
+                <a th:href="@{/student/assignments}" class="small">내 과제 보러 가기 &rarr;</a>
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(submissions)}">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th class="col-main">과제</th>
+                        <th>상태</th>
+                        <th>점수</th>
+                        <th style="min-width: 12rem">피드백</th>
+                        <th>제출일시</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${submissions}" th:with="a=${s.assignment}">
+                        <td>
+                            <a th:href="@{/student/assignments/{id}(id=${a.id})}" th:text="${a.title}">과제 제목</a>
+                            <div class="small text-gray-500" th:text="${a.course.name}">강좌명</div>
+                        </td>
+                        <td class="text-nowrap">
+                            <span th:if="${s.graded}" class="badge badge-primary">채점 완료</span>
+                            <span th:unless="${s.graded}" class="badge badge-success">채점 대기</span>
+                        </td>
+                        <td class="text-nowrap">
+                            <span th:if="${s.graded}">
+                                <strong class="h6" th:text="${s.score}">90</strong> / <span th:text="${a.maxScore}">100</span>
+                            </span>
+                            <span th:unless="${s.graded}" class="text-gray-400">-</span>
+                        </td>
+                        <!-- 피드백은 th:text로 출력 (HTML 이스케이프), 줄바꿈 유지 -->
+                        <td class="small">
+                            <span th:if="${s.feedback != null}" style="white-space: pre-wrap" th:text="${s.feedback}">피드백</span>
+                            <span th:if="${s.feedback == null}" class="text-gray-400">-</span>
+                        </td>
+                        <td class="date-cell small" th:text="${#temporals.format(s.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

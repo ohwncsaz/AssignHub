@@ -73,6 +73,22 @@
         </div>
         <div class="card-body">
 
+            <!-- S4 결과: 채점이 끝났으면 점수 · 피드백 -->
+            <div th:if="${submission != null and submission.graded}" class="alert alert-primary mb-4">
+                <div class="d-flex align-items-baseline">
+                    <span class="font-weight-bold mr-2">점수</span>
+                    <span class="h4 mb-0 font-weight-bold" th:text="${submission.score}">90</span>
+                    <span class="ml-1">/ <span th:text="${assignment.maxScore}">100</span>점</span>
+                    <span class="small text-gray-600 ml-auto">
+                        채점 <span class="date-cell" th:text="${#temporals.format(submission.gradedAt, 'yyyy-MM-dd HH:mm')}">2026-10-08 10:00</span>
+                    </span>
+                </div>
+                <div th:if="${submission.feedback != null}" class="mt-2 pt-2 border-top">
+                    <div class="small font-weight-bold mb-1">피드백</div>
+                    <div style="white-space: pre-wrap" th:text="${submission.feedback}">피드백</div>
+                </div>
+            </div>
+
             <!-- 이미 제출한 내용 -->
             <div th:if="${submission != null}" class="mb-4 pb-3 border-bottom">
                 <div class="small text-gray-500 mb-2">
