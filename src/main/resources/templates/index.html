@@ -55,15 +55,15 @@
     <!-- 학생 바로가기 (내 통계 카드는 S5에서 추가) -->
     <div class="row" sec:authorize="hasRole('STUDENT')">
         <div class="col-xl-4 col-md-6 mb-4">
-            <a th:href="@{/student/courses/join}" class="text-decoration-none">
+            <a th:href="@{/student/courses}" class="text-decoration-none">
                 <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
                         <div class="row no-gutters align-items-center">
                             <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">수강 등록</div>
-                                <div class="small text-gray-700">참여코드로 강좌에 등록</div>
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">내 강좌</div>
+                                <div class="small text-gray-700">수강 중인 강좌 · 참여코드 등록</div>
                             </div>
-                            <div class="col-auto"><i class="fas fa-key fa-2x text-gray-300"></i></div>
+                            <div class="col-auto"><i class="fas fa-book-open fa-2x text-gray-300"></i></div>
                         </div>
                     </div>
                 </div>

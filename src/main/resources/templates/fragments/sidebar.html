@@ -49,7 +49,15 @@
         <hr class="sidebar-divider">
         <div class="sidebar-heading">학생</div>
 
-        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/student/courses')} ? 'active'">
+        <!-- 내 강좌: 목록(/student/courses)과 강좌 상세(/student/courses/{id}) — 수강 등록(/join)은 별도 메뉴 -->
+        <li class="nav-item"
+            th:classappend="${#strings.startsWith(path, '/student/courses') and path != '/student/courses/join'} ? 'active'">
+            <a class="nav-link" th:href="@{/student/courses}">
+                <i class="fas fa-fw fa-book-open"></i>
+                <span>내 강좌</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${path == '/student/courses/join'} ? 'active'">
             <a class="nav-link" th:href="@{/student/courses/join}">
                 <i class="fas fa-fw fa-key"></i>
                 <span>수강 등록</span>

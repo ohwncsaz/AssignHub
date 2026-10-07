@@ -3,8 +3,11 @@ package com.hjh.assignhub.enrollment;
 import java.util.List;
 import java.util.Locale;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.hjh.assignhub.common.FormFieldException;
 import com.hjh.assignhub.course.Course;
@@ -42,6 +45,14 @@ public class EnrollmentService {
     // I2 수강생 목록 — 본인 강좌 확인(B5)은 호출하는 쪽에서 CourseService.getMyCourse로 먼저 한다
     public List<Enrollment> findStudentsOfCourse(Long courseId) {
         return enrollmentRepository.findStudentsOfCourse(courseId);
+    }
+
+    // 학생의 강좌 상세 — B2 수강 등록한 강좌만 볼 수 있다 (없는 강좌는 404, 남의 강좌는 403)
+    public Enrollment getMyEnrollment(Long courseId, Long studentId) {
+        return enrollmentRepository.findByCourseIdAndStudentId(courseId, studentId)
+                .orElseThrow(() -> courseRepository.existsById(courseId)
+                        ? new AccessDeniedException("수강 등록한 강좌만 볼 수 있습니다.")
+                        : new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
     // B2 해당 강좌에 수강 등록된 학생인지

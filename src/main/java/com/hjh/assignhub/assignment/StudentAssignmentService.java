@@ -30,6 +30,13 @@ public class StudentAssignmentService {
                 .toList();
     }
 
+    // 내 강좌 상세 — 그 강좌의 과제만 (정렬은 내 과제 목록과 같음)
+    public List<Assignment> findMyAssignmentsInCourse(Long studentId, Long courseId) {
+        return findMyAssignments(studentId).stream()
+                .filter(a -> a.getCourse().getId().equals(courseId))
+                .toList();
+    }
+
     // B2 해당 강좌에 수강 등록된 학생만 과제 열람 — 아니면 403
     public Assignment getMyAssignment(Long assignmentId, Long studentId) {
         Assignment assignment = studentAssignmentRepository.findDetailById(assignmentId)
