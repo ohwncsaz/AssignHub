@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title th:text="${assignment == null} ? '과제 등록' : '과제 수정'">과제 등록</title>
+</head>
+<body>
+<div layout:fragment="content" th:with="isNew=${assignment == null}">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800" th:text="${isNew} ? '과제 등록' : '과제 수정'">과제 등록</h1>
+            <div class="small text-gray-600" th:text="${course.name}">강좌명</div>
+        </div>
+        <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 강좌로 돌아가기
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <!-- 첨부파일 업로드를 위해 multipart/form-data -->
+            <form th:action="${isNew} ? @{/instructor/assignments} : @{/instructor/assignments/{id}/edit(id=${assignment.id})}"
+                  th:object="${assignmentForm}" method="post" enctype="multipart/form-data" novalidate>
+                <input type="hidden" th:field="*{courseId}">
+
+                <div class="form-group">
+                    <label for="title" class="font-weight-bold">제목</label>
+                    <input type="text" th:field="*{title}" class="form-control" th:errorclass="is-invalid"
+                           maxlength="200" placeholder="예: 1주차 과제 — 회원가입 구현">
+                    <div class="invalid-feedback" th:errors="*{title}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="content" class="font-weight-bold">내용</label>
+                    <textarea th:field="*{content}" class="form-control" th:errorclass="is-invalid" rows="8"
+                              placeholder="과제 설명, 제출 방법 등을 입력하세요."></textarea>
+                    <div class="invalid-feedback" th:errors="*{content}"></div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="startAt" class="font-weight-bold">시작일시</label>
+                        <input type="datetime-local" th:field="*{startAt}" class="form-control"
+                               th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{startAt}"></div>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="endAt" class="font-weight-bold">종료일시</label>
+                        <input type="datetime-local" th:field="*{endAt}" class="form-control"
+                               th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{endAt}"></div>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="maxScore" class="font-weight-bold">배점</label>
+                        <input type="number" th:field="*{maxScore}" class="form-control" th:errorclass="is-invalid"
+                               min="1" max="1000">
+                        <div class="invalid-feedback" th:errors="*{maxScore}"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="file" class="font-weight-bold">첨부파일 <span class="small text-gray-500">(선택 · 10MB 이하)</span></label>
+
+                    <div th:if="${!isNew and assignment.filePath != null}" class="mb-2">
+                        <a th:href="@{/instructor/assignments/{id}/file(id=${assignment.id})}" class="small">
+                            <i class="fas fa-paperclip fa-sm mr-1"></i><span th:text="${assignment.fileName}">file.pdf</span>
+                        </a>
+                        <div class="custom-control custom-checkbox d-inline-block ml-3">
+                            <input type="checkbox" class="custom-control-input" th:field="*{removeFile}">
+                            <label class="custom-control-label small" th:for="${#ids.prev('removeFile')}">첨부 삭제</label>
+                        </div>
+                        <div class="small text-gray-500">새 파일을 선택하면 기존 첨부가 교체됩니다.</div>
+                    </div>
+
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="file" name="file">
+                        <label class="custom-file-label" for="file">파일 선택</label>
+                    </div>
+                </div>
+
+                <hr>
+                <div class="text-right">
+                    <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-secondary">취소</a>
+                    <button type="submit" class="btn btn-primary" th:text="${isNew} ? '등록' : '수정'">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        // 선택한 파일 이름을 custom-file 라벨에 표시
+        $('.custom-file-input').on('change', function () {
+            const name = this.files.length ? this.files[0].name : '파일 선택';
+            $(this).next('.custom-file-label').text(name);
+        });
+    </script>
+</th:block>
+</body>
+</html>

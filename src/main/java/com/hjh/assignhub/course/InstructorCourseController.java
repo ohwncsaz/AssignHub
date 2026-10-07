@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.hjh.assignhub.assignment.AssignmentService;
 import com.hjh.assignhub.auth.LoginUser;
 
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class InstructorCourseController {
 
     private final CourseService courseService;
+    private final AssignmentService assignmentService;
 
     @GetMapping
     public String list(@AuthenticationPrincipal LoginUser loginUser, Model model) {
@@ -47,7 +49,9 @@ public class InstructorCourseController {
 
     @GetMapping("/{id}")
     public String detail(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long id, Model model) {
-        model.addAttribute("course", courseService.getMyCourse(id, loginUser.getId()));
+        Course course = courseService.getMyCourse(id, loginUser.getId());
+        model.addAttribute("course", course);
+        model.addAttribute("assignments", assignmentService.findByCourse(course.getId()));
         return "instructor/courses/detail";
     }
 }

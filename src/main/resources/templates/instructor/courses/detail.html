@@ -45,6 +45,65 @@
         </div>
     </div>
 
+    <!-- I3 과제 목록 · 등록 · 수정 · 삭제 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                과제 <span class="badge badge-primary ml-1" th:text="${#lists.size(assignments)}">0</span>
+            </h6>
+            <a th:href="@{/instructor/assignments/new(courseId=${course.id})}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus fa-sm mr-1"></i> 과제 등록
+            </a>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(assignments)}" class="text-center text-gray-500 py-4">
+                등록된 과제가 없습니다.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(assignments)}">
+                <table class="table table-bordered align-middle">
+                    <thead>
+                    <tr>
+                        <th style="width: 80px">상태</th>
+                        <th>제목</th>
+                        <th style="width: 300px">제출 기간</th>
+                        <th style="width: 70px">배점</th>
+                        <th style="width: 140px">관리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${assignments}">
+                        <td class="text-center">
+                            <span class="badge" th:classappend="'badge-' + ${a.status.badge}"
+                                  th:text="${a.status.label}">진행중</span>
+                        </td>
+                        <td>
+                            <span th:text="${a.title}">과제 제목</span>
+                            <a th:if="${a.filePath != null}" th:href="@{/instructor/assignments/{id}/file(id=${a.id})}"
+                               class="ml-1 text-gray-500" th:title="${a.fileName}">
+                                <i class="fas fa-paperclip fa-sm"></i>
+                            </a>
+                        </td>
+                        <td class="small">
+                            <span th:text="${#temporals.format(a.startAt, 'yyyy-MM-dd HH:mm')}">시작</span>
+                            ~
+                            <span th:text="${#temporals.format(a.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
+                        </td>
+                        <td class="text-center" th:text="${a.maxScore}">100</td>
+                        <td class="text-center text-nowrap">
+                            <a th:href="@{/instructor/assignments/{id}/edit(id=${a.id})}"
+                               class="btn btn-sm btn-outline-primary">수정</a>
+                            <form th:action="@{/instructor/assignments/{id}/delete(id=${a.id})}" method="post"
+                                  class="d-inline" onsubmit="return confirm('과제를 삭제할까요? 되돌릴 수 없습니다.');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <th:block layout:fragment="scripts">
