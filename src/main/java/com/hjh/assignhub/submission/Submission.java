@@ -71,4 +71,30 @@ public class Submission {
         this.submittedAt = LocalDateTime.now();
         this.status = SubmissionStatus.SUBMITTED;
     }
+
+    // B3 기간 내 재제출 — 새 행을 만들지 않고 기존 제출을 덮어쓴다 (제출일시도 갱신)
+    public void resubmit(String content, String filePath) {
+        this.content = content;
+        this.filePath = filePath;
+        this.submittedAt = LocalDateTime.now();
+    }
+
+    // I5 채점 — 채점하면 GRADED가 되어 재제출할 수 없다(B4)
+    public void grade(int score, String feedback) {
+        this.score = score;
+        this.feedback = feedback;
+        this.status = SubmissionStatus.GRADED;
+        this.gradedAt = LocalDateTime.now();
+    }
+
+    public boolean isGraded() {
+        return status == SubmissionStatus.GRADED;
+    }
+
+    public String getFileName() {
+        if (filePath == null) {
+            return null;
+        }
+        return filePath.substring(filePath.lastIndexOf('/') + 1);
+    }
 }
