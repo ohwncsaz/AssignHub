@@ -46,6 +46,9 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout"))
+                // PDF 미리보기를 같은 사이트 화면 안(iframe)에 넣기 위해 SAMEORIGIN 허용 (기본값 DENY는 모든 iframe 차단)
+                // 다른 사이트가 우리 화면을 iframe으로 감싸는 것(클릭재킹)은 여전히 막힌다
+                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 // 역할이 맞지 않는 URL 접근 → 403 페이지 (세션 만료로 인한 CSRF 오류는 로그인 화면으로)
                 .exceptionHandling(ex -> ex.accessDeniedHandler(new SessionExpiredAwareAccessDeniedHandler("/error/403")));
         return http.build();

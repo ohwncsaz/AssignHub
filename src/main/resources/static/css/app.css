@@ -51,3 +51,13 @@ body {
 .bg-login-image {
     background: url("../img/login-side.svg") center / cover no-repeat;
 }
+
+/* 첨부 텍스트 · 코드 미리보기 — 줄바꿈 · 들여쓰기 유지, 길면 영역 안에서 스크롤 */
+.preview-text {
+    max-height: 500px;
+    overflow: auto;
+    white-space: pre;
+    word-break: normal;
+    tab-size: 4;
+    color: #3a3b45;
+}

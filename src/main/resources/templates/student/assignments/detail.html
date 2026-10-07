@@ -99,6 +99,9 @@
                     <a th:href="@{/student/assignments/{id}/submission/file(id=${assignment.id})}" class="small">
                         <i class="fas fa-paperclip fa-sm mr-1"></i><span th:text="${submission.fileName}">report.pdf</span>
                     </a>
+                    <!-- 내가 낸 첨부 미리보기 — 올바른 파일을 냈는지 바로 확인 -->
+                    <th:block th:replace="~{fragments/file-preview :: filePreview(${preview},
+                            @{/student/assignments/{id}/submission/preview(id=${assignment.id})}, ${submission.fileName})}"></th:block>
                 </div>
             </div>
 

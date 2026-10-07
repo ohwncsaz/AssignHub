@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.hjh.assignhub.auth.LoginUser;
 import com.hjh.assignhub.common.BusinessException;
 import com.hjh.assignhub.common.FileDownload;
+import com.hjh.assignhub.common.FilePreviewer;
 import com.hjh.assignhub.common.FileStorage;
 import com.hjh.assignhub.common.FormFieldException;
 import com.hjh.assignhub.submission.Submission;
@@ -35,6 +36,7 @@ public class StudentAssignmentController {
     private final StudentAssignmentService studentAssignmentService;
     private final SubmissionService submissionService;
     private final FileStorage fileStorage;
+    private final FilePreviewer filePreviewer;
 
     @GetMapping
     public String list(@AuthenticationPrincipal LoginUser loginUser, Model model) {
@@ -93,12 +95,21 @@ public class StudentAssignmentController {
         return FileDownload.attachment(fileStorage.load(submission.getFilePath()), submission.getFileName());
     }
 
+    // 내가 제출한 첨부 미리보기 (이미지 · PDF를 화면 안에서) — 다운로드와 같은 권한(B2, 본인 제출만)
+    @GetMapping("/{id}/submission/preview")
+    public ResponseEntity<Resource> previewMySubmission(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long id) {
+        Submission submission = submissionService.getMySubmissionWithFile(id, loginUser.getId());
+        return filePreviewer.inline(submission.getFilePath(), submission.getFileName());
+    }
+
     // 제출 가능 여부는 화면 표시용(버튼 비활성화) — 실제 차단은 SubmissionService
     private void addDetailModel(Model model, Assignment assignment, Submission submission) {
         boolean open = assignment.statusAt(LocalDateTime.now()) == AssignmentStatus.OPEN;
         boolean graded = submission != null && submission.isGraded();
         model.addAttribute("assignment", assignment);
         model.addAttribute("submission", submission);
+        model.addAttribute("preview", submission == null ? null
+                : filePreviewer.previewOf(submission.getFilePath(), submission.getFileName()));
         model.addAttribute("canSubmit", open && !graded);
         model.addAttribute("blockedReason", graded ? "채점이 완료되어 다시 제출할 수 없습니다."
                 : !open ? "지금은 제출 기간이 아닙니다." : null);
