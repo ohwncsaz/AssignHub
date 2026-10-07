@@ -13,6 +13,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.hjh.assignhub.assignment.AssignmentService;
 import com.hjh.assignhub.auth.LoginUser;
+import com.hjh.assignhub.enrollment.EnrollmentService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class InstructorCourseController {
 
     private final CourseService courseService;
     private final AssignmentService assignmentService;
+    private final EnrollmentService enrollmentService;
 
     @GetMapping
     public String list(@AuthenticationPrincipal LoginUser loginUser, Model model) {
@@ -52,6 +54,7 @@ public class InstructorCourseController {
         Course course = courseService.getMyCourse(id, loginUser.getId());
         model.addAttribute("course", course);
         model.addAttribute("assignments", assignmentService.findByCourse(course.getId()));
+        model.addAttribute("enrollments", enrollmentService.findStudentsOfCourse(course.getId())); // I2
         return "instructor/courses/detail";
     }
 }

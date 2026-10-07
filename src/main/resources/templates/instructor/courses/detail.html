@@ -43,6 +43,17 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-xl-4 col-md-6 mb-4">
+            <a href="#students" class="text-decoration-none">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-2">수강생</div>
+                        <div class="h5 mb-0 text-gray-800"><span th:text="${#lists.size(enrollments)}">0</span>명</div>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- I3 과제 목록 · 등록 · 수정 · 삭제 -->
@@ -97,6 +108,42 @@
                                 <button type="submit" class="btn btn-sm btn-outline-danger">삭제</button>
                             </form>
                         </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- I2 수강생 목록 -->
+    <div class="card shadow mb-4" id="students">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                수강생 <span class="badge badge-info ml-1" th:text="${#lists.size(enrollments)}">0</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(enrollments)}" class="text-center text-gray-500 py-4">
+                아직 등록한 학생이 없습니다. 참여코드를 학생들에게 공유하세요.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(enrollments)}">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th style="width: 60px">No</th>
+                        <th style="width: 140px">학번</th>
+                        <th style="width: 140px">이름</th>
+                        <th>이메일</th>
+                        <th style="width: 180px">등록일시</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e, stat : ${enrollments}">
+                        <td class="text-center" th:text="${stat.count}">1</td>
+                        <td th:text="${e.student.studentNo}">20260001</td>
+                        <td th:text="${e.student.name}">홍길동</td>
+                        <td th:text="${e.student.email}">hong@test.com</td>
+                        <td th:text="${#temporals.format(e.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
                     </tr>
                     </tbody>
                 </table>

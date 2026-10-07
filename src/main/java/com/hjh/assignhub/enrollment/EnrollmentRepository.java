@@ -13,4 +13,9 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     @Query("select e from Enrollment e join fetch e.course c join fetch c.instructor "
             + "where e.student.id = :studentId order by e.joinedAt desc")
     List<Enrollment> findMyEnrollments(@Param("studentId") Long studentId);
+
+    // I2 강좌별 등록 학생 — 먼저 등록한 순
+    @Query("select e from Enrollment e join fetch e.student "
+            + "where e.course.id = :courseId order by e.joinedAt asc")
+    List<Enrollment> findStudentsOfCourse(@Param("courseId") Long courseId);
 }

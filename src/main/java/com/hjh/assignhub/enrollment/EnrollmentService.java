@@ -39,6 +39,11 @@ public class EnrollmentService {
         return enrollmentRepository.findMyEnrollments(studentId);
     }
 
+    // I2 수강생 목록 — 본인 강좌 확인(B5)은 호출하는 쪽에서 CourseService.getMyCourse로 먼저 한다
+    public List<Enrollment> findStudentsOfCourse(Long courseId) {
+        return enrollmentRepository.findStudentsOfCourse(courseId);
+    }
+
     // B2 해당 강좌에 수강 등록된 학생인지
     public boolean isEnrolled(Long courseId, Long studentId) {
         return enrollmentRepository.existsByCourseIdAndStudentId(courseId, studentId);
