@@ -21,6 +21,8 @@ public class LoginUser implements UserDetails {
     private final String password;
     private final String name;
     private final Role role;
+    // true면 비밀번호 변경 화면 외에는 이용할 수 없다 (PasswordChangeRequiredInterceptor)
+    private final boolean passwordChangeRequired;
 
     public LoginUser(User user) {
         this.id = user.getId();
@@ -28,6 +30,7 @@ public class LoginUser implements UserDetails {
         this.password = user.getPassword();
         this.name = user.getName();
         this.role = user.getRole();
+        this.passwordChangeRequired = user.isPasswordChangeRequired();
     }
 
     @Override

@@ -40,7 +40,26 @@ docker compose up -d
 | 계정 | 이메일 | 비밀번호 | 비고 |
 |---|---|---|---|
 | 강사 | `instructor@test.com` | `password123` | 앱 시작 시 자동 생성 (U4) · 로컬 개발용 기본값 |
-| 학생 | — | — | `/signup`에서 직접 가입 |
+| 학생 | — | — | `/signup`에서 직접 가입하거나, 강사가 추가 (초기 비밀번호 = 학번) |
+
+### 데모 모드 (시연용)
+
+```bash
+./gradlew bootRun --args='--spring.profiles.active=demo'
+```
+
+IntelliJ에서는 실행 설정의 **Active profiles**에 `demo`를 입력합니다. `demo` 프로필일 때만 아래 데이터가 생성되며, 이미 있으면 다시 만들지 않습니다.
+
+- 강좌 `자바 스프링 웹 개발 (데모)` — 참여코드는 앱 시작 로그에 출력
+- 학생 4명 (비밀번호 모두 `password123`) — 3명은 수강 중, `최수아`는 미등록 (수강 등록 · 학생 추가 시연용)
+
+  | 학번 | 이름 | 이메일 |
+  |---|---|---|
+  | 20260101 | 김민준 | `demo1@test.com` |
+  | 20260102 | 이서연 | `demo2@test.com` |
+  | 20260103 | 박지호 | `demo3@test.com` |
+  | 20260104 | 최수아 | `demo4@test.com` |
+- 과제 4개 — 마감 1 · 진행중 2(그중 1개는 3시간 뒤 마감) · 예정 1, 제출물 3건
 
 - DB 접속 정보 · 강사 계정 · 첨부파일 폴더는 환경변수로 바꿀 수 있습니다: `DB_USERNAME`, `DB_PASSWORD`, `INSTRUCTOR_EMAIL`, `INSTRUCTOR_PASSWORD`, `INSTRUCTOR_NAME`, `UPLOAD_DIR`(기본 `./uploads`, 10MB 제한)
 - DB 초기화: `docker compose down -v` → `docker compose up -d`
@@ -81,6 +100,17 @@ docker compose up -d
 | S4 | 결과 확인 | 점수 · 피드백 조회 | ⏳ |
 | S5 | 내 통계 | 제출률 · 평균 점수 · 마감 임박 | ⏳ |
 
+### 추가 기능 (요구사항 외)
+
+| 기능 | 내용 |
+|---|---|
+| 수강생 직접 추가 | 강사가 학번 · 이름 · 이메일로 추가 — 가입한 학생은 기존 계정으로 등록, 가입하지 않은 학생은 계정 생성 후 등록 (초기 비밀번호 = 학번, **첫 로그인 때 변경 강제**) |
+| 엑셀 대량 추가 | 양식(.xlsx) 업로드로 최대 300명 — 줄마다 따로 처리해 실패한 줄이 있어도 나머지는 등록, 줄별 결과 표시 |
+| 수강생 내보내기 | 수강 등록만 삭제 (학생 계정 유지) — 해당 강좌에 제출물이 있으면 불가 |
+| 참여코드 재발급 | 코드 유출 시 새 코드 발급 (이미 등록한 학생은 영향 없음) |
+| 프로필 수정 | 이름 · 이메일 · 학번(학생) 수정, 현재 비밀번호 확인 후 비밀번호 변경 |
+| 첨부파일 확장자 제한 | 문서 · 압축 · 이미지 · 소스 파일만 허용, 10MB 이하 |
+
 <br>
 
 ## 비즈니스 규칙
@@ -115,6 +145,7 @@ erDiagram
         bigint id PK
         varchar email UK
         varchar password "BCrypt"
+        boolean password_change_required "추가 컬럼"
         varchar name
         varchar student_no "nullable"
         varchar role "INSTRUCTOR / STUDENT"
@@ -160,7 +191,10 @@ erDiagram
 - `enrollment` : **UNIQUE (course_id, student_id)** — 중복 수강 불가
 - `submission` : **UNIQUE (assignment_id, student_id)** — 과제당 학생 1건 (B3)
 - `user`는 PostgreSQL 예약어라 테이블명을 `users`로 사용
-- 추가 컬럼: 없음 (수업 제공 ERD 그대로 사용)
+- **추가 컬럼** `users.password_change_required` (boolean, 기본값 false)
+  - 이유: 강사가 수강생을 직접 추가하면 학생 계정이 초기 비밀번호(학번)로 만들어진다. 학번은 다른 사람도 알 수 있는 값이라, 학생이 첫 로그인 때 반드시 비밀번호를 바꾸도록 강제해야 한다. 이 "아직 바꾸지 않음" 상태를 저장할 곳이 필요해 컬럼을 추가했다.
+  - 동작: 값이 true인 사용자는 비밀번호 변경 화면 외의 모든 요청이 서버(인터셉터)에서 비밀번호 변경 화면으로 이동되고, 비밀번호를 바꾸면 false가 된다.
+  - 기존 데이터와의 호환: DB 기본값을 false로 두어, 이미 있는 계정에는 영향이 없다.
 
 <br>
 
@@ -189,21 +223,22 @@ SB Admin 2 페이지를 복사해 내용만 바꿔 사용합니다.
 ```
 src/main/java/com/hjh/assignhub
 ├── assignment/  과제 엔티티 · 강사 과제 관리(I3) · 학생 과제 목록/상세(S2) · 상태 배지
-├── auth/        로그인 사용자(LoginUser) · UserDetailsService · 로그인/회원가입 컨트롤러
+├── auth/        로그인 사용자(LoginUser) · 로그인/회원가입 · 세션 갱신 · 첫 로그인 비밀번호 변경 강제
 ├── common/      대시보드 · 에러 페이지 · 첨부파일 저장/다운로드 · 공통 예외
-├── config/      SecurityConfig · 강사 초기 계정(InstructorInitializer)
+├── config/      SecurityConfig · 인터셉터 등록 · 강사 초기 계정 · 데모 데이터(demo 프로필)
 ├── course/      강좌 엔티티 · 강좌 개설/참여코드 발급(I1)
-├── enrollment/  수강 엔티티 · 참여코드로 수강 등록(S1)
+├── enrollment/  수강 엔티티 · 참여코드 수강 등록(S1) · 수강생 목록(I2) · 수강생 추가/엑셀 대량 추가/내보내기
 ├── submission/  제출 엔티티 (제출 · 채점 기능은 W3)
-└── user/        User 엔티티 · Role · Repository · UserService · 회원가입 폼
+└── user/        User 엔티티 · Role · 회원가입 · 프로필 수정 · 비밀번호 변경
 
 src/main/resources/templates
 ├── layout/      default(사이드바 포함) · auth(로그인/가입용)
 ├── fragments/   sidebar · topbar · alerts · assets(CDN)
 ├── auth/        login · signup
-├── instructor/  courses(목록 · 상세) · assignments(등록 · 수정 폼)
+├── instructor/  courses(목록 · 상세) · assignments(등록 · 수정 폼) · students(추가 · 엑셀 추가)
+├── profile/     프로필 수정 · 비밀번호 변경
 ├── student/     courses(수강 등록) · assignments(목록 · 상세)
-├── error/       403 · 404
+├── error/       403 · 404 · 4xx · 5xx
 └── index.html   역할별 대시보드
 ```
 

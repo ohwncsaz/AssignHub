@@ -57,4 +57,13 @@ public class InstructorCourseController {
         model.addAttribute("enrollments", enrollmentService.findStudentsOfCourse(course.getId())); // I2
         return "instructor/courses/detail";
     }
+
+    @PostMapping("/{id}/join-code")
+    public String regenerateJoinCode(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long id,
+                                     RedirectAttributes redirectAttributes) {
+        String joinCode = courseService.regenerateJoinCode(id, loginUser.getId());
+        redirectAttributes.addFlashAttribute("successMessage",
+                "참여코드를 " + joinCode + "(으)로 재발급했습니다. 이전 코드로는 더 이상 수강 등록할 수 없습니다.");
+        return "redirect:/instructor/courses/" + id;
+    }
 }

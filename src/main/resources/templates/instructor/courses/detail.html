@@ -28,6 +28,13 @@
                         <button type="button" id="copyJoinCode" class="btn btn-sm btn-outline-success">
                             <i class="fas fa-copy fa-sm"></i> 복사
                         </button>
+                        <!-- 코드가 유출됐을 때 재발급 — 이미 등록한 학생은 영향 없음 -->
+                        <form th:action="@{/instructor/courses/{id}/join-code(id=${course.id})}" method="post"
+                              class="ml-1" onsubmit="return confirm('참여코드를 재발급할까요? 이전 코드로는 더 이상 등록할 수 없습니다.');">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary" title="참여코드 재발급">
+                                <i class="fas fa-sync-alt fa-sm"></i> 재발급
+                            </button>
+                        </form>
                     </div>
                     <div class="small text-gray-500 mt-2">학생은 [수강 등록] 메뉴에서 이 코드를 입력합니다.</div>
                 </div>
@@ -117,14 +124,22 @@
 
     <!-- I2 수강생 목록 -->
     <div class="card shadow mb-4" id="students">
-        <div class="card-header py-3">
+        <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary">
                 수강생 <span class="badge badge-info ml-1" th:text="${#lists.size(enrollments)}">0</span>
             </h6>
+            <div class="mt-2 mt-sm-0">
+                <a th:href="@{/instructor/courses/{id}/students/new(id=${course.id})}" class="btn btn-sm btn-info">
+                    <i class="fas fa-user-plus fa-sm mr-1"></i> 학생 추가
+                </a>
+                <a th:href="@{/instructor/courses/{id}/students/import(id=${course.id})}" class="btn btn-sm btn-outline-info">
+                    <i class="fas fa-file-excel fa-sm mr-1"></i> 엑셀로 추가
+                </a>
+            </div>
         </div>
         <div class="card-body">
             <div th:if="${#lists.isEmpty(enrollments)}" class="text-center text-gray-500 py-4">
-                아직 등록한 학생이 없습니다. 참여코드를 학생들에게 공유하세요.
+                아직 등록한 학생이 없습니다. 참여코드를 학생들에게 공유하거나 직접 추가하세요.
             </div>
             <div class="table-responsive" th:unless="${#lists.isEmpty(enrollments)}">
                 <table class="table table-bordered">
@@ -135,15 +150,28 @@
                         <th style="width: 140px">이름</th>
                         <th>이메일</th>
                         <th style="width: 180px">등록일시</th>
+                        <th style="width: 100px">관리</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="e, stat : ${enrollments}">
                         <td class="text-center" th:text="${stat.count}">1</td>
                         <td th:text="${e.student.studentNo}">20260001</td>
-                        <td th:text="${e.student.name}">홍길동</td>
+                        <td>
+                            <span th:text="${e.student.name}">홍길동</span>
+                            <span th:if="${e.student.passwordChangeRequired}" class="badge badge-warning ml-1"
+                                  title="강사가 만든 계정 — 아직 초기 비밀번호(학번)를 바꾸지 않았습니다">첫 로그인 전</span>
+                        </td>
                         <td th:text="${e.student.email}">hong@test.com</td>
                         <td th:text="${#temporals.format(e.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
+                        <td class="text-center">
+                            <form th:action="@{/instructor/courses/{cid}/students/{sid}/remove(cid=${course.id},sid=${e.student.id})}"
+                                  method="post" class="d-inline"
+                                  th:data-name="${e.student.name}"
+                                  onsubmit="return confirm(this.dataset.name + ' 학생을 강좌에서 내보낼까요? 학생 계정은 삭제되지 않습니다.');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">내보내기</button>
+                            </form>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

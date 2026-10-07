@@ -40,6 +40,11 @@ public class User {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    // ERD 추가 컬럼 — 강사가 만든 학생 계정은 초기 비밀번호(학번)로 시작하므로 첫 로그인 때 변경을 강제한다
+    // 기존 행이 있는 DB에 컬럼을 추가해도 실패하지 않도록 DB 기본값 false 지정
+    @Column(name = "password_change_required", nullable = false, columnDefinition = "boolean default false")
+    private boolean passwordChangeRequired;
+
     private User(String email, String password, String name, String studentNo, Role role) {
         this.email = email;
         this.password = password;
@@ -50,6 +55,13 @@ public class User {
 
     public static User createStudent(String email, String encodedPassword, String name, String studentNo) {
         return new User(email, encodedPassword, name, studentNo, Role.STUDENT);
+    }
+
+    // 강사가 수강생 추가로 만든 학생 계정 — 첫 로그인 때 비밀번호 변경 필요
+    public static User createStudentByInstructor(String email, String encodedInitialPassword, String name, String studentNo) {
+        User student = new User(email, encodedInitialPassword, name, studentNo, Role.STUDENT);
+        student.passwordChangeRequired = true;
+        return student;
     }
 
     public static User createInstructor(String email, String encodedPassword, String name) {
@@ -71,5 +83,6 @@ public class User {
 
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
+        this.passwordChangeRequired = false;
     }
 }
