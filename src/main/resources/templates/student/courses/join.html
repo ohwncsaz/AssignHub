@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>수강 등록</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">수강 등록</h1>
+
+    <!-- S1 참여코드 입력 -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">참여코드 입력</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-gray-600">강사에게 받은 8자리 참여코드를 입력하세요.</p>
+                    <form th:action="@{/student/courses/join}" th:object="${joinForm}" method="post" novalidate>
+                        <div class="form-row align-items-start">
+                            <div class="col-sm-8 mb-2">
+                                <input type="text" th:field="*{joinCode}" class="form-control text-uppercase"
+                                       th:errorclass="is-invalid" placeholder="예: AB3K7XQ2" maxlength="20"
+                                       autocomplete="off" style="letter-spacing: 0.1em">
+                                <div class="invalid-feedback" th:errors="*{joinCode}"></div>
+                            </div>
+                            <div class="col-sm-4 mb-2">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    <i class="fas fa-key fa-sm mr-1"></i> 등록
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 내가 수강 중인 강좌 -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                수강 중인 강좌 <span class="badge badge-success ml-1" th:text="${#lists.size(enrollments)}">0</span>
+            </h6>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(enrollments)}" class="text-center text-gray-500 py-4">
+                아직 수강 중인 강좌가 없습니다.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(enrollments)}">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>강좌명</th>
+                        <th style="width: 160px">강사</th>
+                        <th style="width: 180px">등록일시</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="enrollment : ${enrollments}">
+                        <td th:text="${enrollment.course.name}">강좌명</td>
+                        <td th:text="${enrollment.course.instructor.name}">강사</td>
+                        <td th:text="${#temporals.format(enrollment.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
