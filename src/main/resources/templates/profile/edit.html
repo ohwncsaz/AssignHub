@@ -49,6 +49,37 @@
         </div>
 
         <div class="col-lg-5">
+            <!-- 프로필 사진: png · jpg · gif, 2MB 이하 (SVG 불가) -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">프로필 사진</h6>
+                </div>
+                <div class="card-body text-center">
+                    <img th:if="${user.profileImagePath != null}" class="rounded-circle mb-3 shadow-sm"
+                         style="width: 120px; height: 120px; object-fit: cover"
+                         th:src="@{/profile/image(v=${user.profileImagePath.hashCode()})}" alt="프로필 사진">
+                    <div th:if="${user.profileImagePath == null}" class="mb-3">
+                        <i class="fas fa-user-circle text-gray-300" style="font-size: 120px"></i>
+                    </div>
+
+                    <form th:action="@{/profile/image}" method="post" enctype="multipart/form-data" class="text-left">
+                        <div class="custom-file mb-2">
+                            <input type="file" class="custom-file-input" id="image" name="image"
+                                   accept=".png,.jpg,.jpeg,.gif">
+                            <label class="custom-file-label" for="image">사진 선택</label>
+                        </div>
+                        <div class="small text-gray-500 mb-2">png · jpg · gif, 2MB 이하</div>
+                        <button type="submit" class="btn btn-primary btn-sm btn-block">
+                            <i class="fas fa-upload fa-sm mr-1"></i> 사진 변경
+                        </button>
+                    </form>
+                    <form th:if="${user.profileImagePath != null}" th:action="@{/profile/image/delete}" method="post"
+                          class="mt-2" onsubmit="return confirm('프로필 사진을 삭제할까요?');">
+                        <button type="submit" class="btn btn-outline-secondary btn-sm btn-block">사진 삭제</button>
+                    </form>
+                </div>
+            </div>
+
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">보안</h6>
@@ -64,5 +95,15 @@
     </div>
 
 </div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        // 선택한 파일 이름을 라벨에 표시
+        $('.custom-file-input').on('change', function () {
+            const name = this.files.length ? this.files[0].name : '사진 선택';
+            $(this).next('.custom-file-label').text(name);
+        });
+    </script>
+</th:block>
 </body>
 </html>

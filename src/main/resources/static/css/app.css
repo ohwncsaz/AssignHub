@@ -41,3 +41,8 @@ body {
     vertical-align: middle;
     margin-left: 0.25rem;
 }
+
+/* 파일 선택 칸의 Bootstrap 기본 버튼 글자("Browse")를 한글로 */
+.custom-file-label::after {
+    content: "찾아보기";
+}

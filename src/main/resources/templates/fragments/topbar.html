@@ -19,7 +19,12 @@
                     <span class="badge badge-primary ml-1" sec:authorize="hasRole('INSTRUCTOR')">강사</span>
                     <span class="badge badge-success ml-1" sec:authorize="hasRole('STUDENT')">학생</span>
                 </span>
-                <i class="fas fa-user-circle fa-2x text-gray-400"></i>
+                <!-- 프로필 사진이 있으면 사진, 없으면 기본 아이콘 (v=경로 해시: 사진을 바꾸면 캐시 갱신) -->
+                <th:block th:with="imagePath=${#authentication.principal.profileImagePath}">
+                    <img th:if="${imagePath != null}" class="img-profile rounded-circle" style="object-fit: cover"
+                         th:src="@{/profile/image(v=${imagePath.hashCode()})}" alt="프로필 사진">
+                    <i th:if="${imagePath == null}" class="fas fa-user-circle fa-2x text-gray-400"></i>
+                </th:block>
             </a>
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <span class="dropdown-item-text small text-gray-500" sec:authentication="principal.email"></span>
