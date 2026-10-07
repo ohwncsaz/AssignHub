@@ -62,7 +62,9 @@
                     </thead>
                     <tbody>
                     <tr th:each="enrollment : ${enrollments}">
-                        <td th:text="${enrollment.course.name}">강좌명</td>
+                        <td>
+                            <a th:href="@{/student/courses/{id}(id=${enrollment.course.id})}" th:text="${enrollment.course.name}">강좌명</a>
+                        </td>
                         <td th:text="${enrollment.course.instructor.name}">강사</td>
                         <td class="date-cell" th:text="${#temporals.format(enrollment.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
                     </tr>
