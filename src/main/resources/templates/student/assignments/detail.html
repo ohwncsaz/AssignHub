@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title th:text="${assignment.title}">과제</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <div class="small text-gray-600 mb-1">
+                <span th:text="${assignment.course.name}">강좌명</span> ·
+                <span th:text="${assignment.course.instructor.name}">강사</span>
+            </div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <span class="badge align-middle mr-1" th:classappend="'badge-' + ${assignment.status.badge}"
+                      th:text="${assignment.status.label}">진행중</span>
+                <span th:text="${assignment.title}">과제 제목</span>
+            </h1>
+        </div>
+        <a th:href="@{/student/assignments}" class="btn btn-sm btn-outline-secondary mt-2 mt-sm-0">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 내 과제
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">제출 기간</div>
+                    <div class="text-gray-800">
+                        <span th:text="${#temporals.format(assignment.startAt, 'yyyy-MM-dd HH:mm')}">시작</span> ~<br>
+                        <span th:text="${#temporals.format(assignment.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">배점</div>
+                    <div class="h5 mb-0 text-gray-800"><span th:text="${assignment.maxScore}">100</span>점</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">과제 내용</h6>
+        </div>
+        <div class="card-body">
+            <!-- 줄바꿈 유지, th:text라 HTML은 이스케이프됨 -->
+            <div class="text-gray-800" style="white-space: pre-wrap" th:text="${assignment.content}">내용</div>
+
+            <div th:if="${assignment.filePath != null}" class="mt-4 pt-3 border-top">
+                <a th:href="@{/student/assignments/{id}/file(id=${assignment.id})}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-download fa-sm mr-1"></i><span th:text="${assignment.fileName}">file.pdf</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -42,7 +42,7 @@ docker compose up -d
 | 강사 | `instructor@test.com` | `password123` | 앱 시작 시 자동 생성 (U4) · 로컬 개발용 기본값 |
 | 학생 | — | — | `/signup`에서 직접 가입 |
 
-- DB 접속 정보와 강사 계정은 환경변수로 바꿀 수 있습니다: `DB_USERNAME`, `DB_PASSWORD`, `INSTRUCTOR_EMAIL`, `INSTRUCTOR_PASSWORD`, `INSTRUCTOR_NAME`
+- DB 접속 정보 · 강사 계정 · 첨부파일 폴더는 환경변수로 바꿀 수 있습니다: `DB_USERNAME`, `DB_PASSWORD`, `INSTRUCTOR_EMAIL`, `INSTRUCTOR_PASSWORD`, `INSTRUCTOR_NAME`, `UPLOAD_DIR`(기본 `./uploads`, 10MB 제한)
 - DB 초기화: `docker compose down -v` → `docker compose up -d`
 
 <br>
@@ -64,9 +64,9 @@ docker compose up -d
 
 | ID | 기능 | 내용 | 상태 |
 |---|---|---|:---:|
-| I1 | 강좌 개설 | 참여코드 자동 발급 | ⏳ |
+| I1 | 강좌 개설 | 참여코드 자동 발급 | ✅ |
 | I2 | 수강생 목록 | 강좌별 등록 학생 조회 | ⏳ |
-| I3 | 과제 등록 · 수정 · 삭제 | 시작/종료일시 · 배점 · 첨부 | ⏳ |
+| I3 | 과제 등록 · 수정 · 삭제 | 시작/종료일시 · 배점 · 첨부 | ✅ |
 | I4 | 제출 현황 | 과제별 제출 / 미제출 목록 | ⏳ |
 | I5 | 채점 · 피드백 | 점수 + 코멘트 입력 | ⏳ |
 | I6 | 통계 대시보드 | 제출률 · 점수 · 미제출자 | ⏳ |
@@ -75,8 +75,8 @@ docker compose up -d
 
 | ID | 기능 | 내용 | 상태 |
 |---|---|---|:---:|
-| S1 | 수강 등록 | 참여코드 입력 | ⏳ |
-| S2 | 내 과제 목록 | 예정 · 진행중 · 마감 배지 | ⏳ |
+| S1 | 수강 등록 | 참여코드 입력 | ✅ |
+| S2 | 내 과제 목록 | 예정 · 진행중 · 마감 배지 | ✅ |
 | S3 | 과제 제출 · 재제출 | 기간 안에서만 · 파일 첨부 | ⏳ |
 | S4 | 결과 확인 | 점수 · 피드백 조회 | ⏳ |
 | S5 | 내 통계 | 제출률 · 평균 점수 · 마감 임박 | ⏳ |
@@ -188,17 +188,23 @@ SB Admin 2 페이지를 복사해 내용만 바꿔 사용합니다.
 
 ```
 src/main/java/com/hjh/assignhub
-├── auth/      로그인 사용자(LoginUser) · UserDetailsService · 로그인/회원가입 컨트롤러
-├── common/    대시보드 · 에러 페이지 컨트롤러
-├── config/    SecurityConfig · 강사 초기 계정(InstructorInitializer)
-└── user/      User 엔티티 · Role · Repository · UserService · 회원가입 폼
+├── assignment/  과제 엔티티 · 강사 과제 관리(I3) · 학생 과제 목록/상세(S2) · 상태 배지
+├── auth/        로그인 사용자(LoginUser) · UserDetailsService · 로그인/회원가입 컨트롤러
+├── common/      대시보드 · 에러 페이지 · 첨부파일 저장/다운로드 · 공통 예외
+├── config/      SecurityConfig · 강사 초기 계정(InstructorInitializer)
+├── course/      강좌 엔티티 · 강좌 개설/참여코드 발급(I1)
+├── enrollment/  수강 엔티티 · 참여코드로 수강 등록(S1)
+├── submission/  제출 엔티티 (제출 · 채점 기능은 W3)
+└── user/        User 엔티티 · Role · Repository · UserService · 회원가입 폼
 
 src/main/resources/templates
-├── layout/    default(사이드바 포함) · auth(로그인/가입용)
-├── fragments/ sidebar · topbar · alerts · assets(CDN)
-├── auth/      login · signup
-├── error/     403 · 404
-└── index.html 역할별 대시보드
+├── layout/      default(사이드바 포함) · auth(로그인/가입용)
+├── fragments/   sidebar · topbar · alerts · assets(CDN)
+├── auth/        login · signup
+├── instructor/  courses(목록 · 상세) · assignments(등록 · 수정 폼)
+├── student/     courses(수강 등록) · assignments(목록 · 상세)
+├── error/       403 · 404
+└── index.html   역할별 대시보드
 ```
 
 <br>

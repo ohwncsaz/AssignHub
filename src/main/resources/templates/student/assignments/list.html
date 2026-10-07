@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>내 과제</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <h1 class="h3 mb-4 text-gray-800">내 과제</h1>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                수강 중인 강좌의 과제 <span class="badge badge-primary ml-1" th:text="${#lists.size(assignments)}">0</span>
+            </h6>
+            <!-- 상태 필터 (화면에서만 거르는 편의 기능) -->
+            <div class="btn-group btn-group-sm mt-2 mt-sm-0" role="group" id="statusFilter"
+                 th:unless="${#lists.isEmpty(assignments)}">
+                <button type="button" class="btn btn-outline-primary active" data-status="ALL">전체</button>
+                <button type="button" class="btn btn-outline-success" data-status="OPEN">진행중</button>
+                <button type="button" class="btn btn-outline-secondary" data-status="UPCOMING">예정</button>
+                <button type="button" class="btn btn-outline-dark" data-status="CLOSED">마감</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(assignments)}" class="text-center text-gray-500 py-4">
+                <p class="mb-2">아직 볼 수 있는 과제가 없습니다.</p>
+                <a th:href="@{/student/courses/join}" class="small">참여코드로 수강 등록하기 &rarr;</a>
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(assignments)}">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <th style="width: 80px">상태</th>
+                        <th style="width: 180px">강좌</th>
+                        <th>과제</th>
+                        <th style="width: 300px">제출 기간</th>
+                        <th style="width: 70px">배점</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="a : ${assignments}" th:attr="data-status=${a.status.name()}">
+                        <td class="text-center">
+                            <span class="badge" th:classappend="'badge-' + ${a.status.badge}"
+                                  th:text="${a.status.label}">진행중</span>
+                        </td>
+                        <td class="small" th:text="${a.course.name}">강좌명</td>
+                        <td>
+                            <a th:href="@{/student/assignments/{id}(id=${a.id})}" th:text="${a.title}">과제 제목</a>
+                            <i th:if="${a.filePath != null}" class="fas fa-paperclip fa-sm text-gray-500 ml-1"></i>
+                        </td>
+                        <td class="small">
+                            <span th:text="${#temporals.format(a.startAt, 'yyyy-MM-dd HH:mm')}">시작</span>
+                            ~
+                            <span th:text="${#temporals.format(a.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
+                        </td>
+                        <td class="text-center" th:text="${a.maxScore}">100</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        $('#statusFilter button').on('click', function () {
+            const status = $(this).data('status');
+            $('#statusFilter button').removeClass('active');
+            $(this).addClass('active');
+            $('tbody tr[data-status]').each(function () {
+                $(this).toggle(status === 'ALL' || $(this).data('status') === status);
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>
