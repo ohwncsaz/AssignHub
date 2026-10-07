@@ -108,6 +108,26 @@ class InstructorAssignmentControllerTest {
     }
 
     @Test
+    @DisplayName("I3 허용되지 않은 형식(.exe)을 첨부하면 첨부 입력칸에 에러를 표시하고 저장하지 않는다")
+    void create_blockedFileType() throws Exception {
+        MockMultipartFile exe = new MockMultipartFile("file", "setup.exe", "application/octet-stream",
+                "MZ".getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/instructor/assignments").file(exe).with(user(instructor)).with(csrf())
+                        .param("courseId", course.getId().toString())
+                        .param("title", "과제")
+                        .param("content", "내용")
+                        .param("startAt", "2026-10-07T09:00")
+                        .param("endAt", "2026-10-14T23:59")
+                        .param("maxScore", "100"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeHasFieldErrors("assignmentForm", "file"))
+                .andExpect(content().string(Matchers.containsString("허용되지 않는 파일 형식입니다.")));
+
+        assertThat(assignmentRepository.findByCourseIdOrderByCreatedAtDesc(course.getId())).isEmpty();
+    }
+
+    @Test
     @DisplayName("I3 수정 화면에 기존 값이 채워진다")
     void editForm_prefilled() throws Exception {
         Assignment assignment = saveAssignment();
