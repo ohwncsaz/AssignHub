@@ -3,6 +3,7 @@ package com.hjh.assignhub.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 // U4 강사 계정은 회원가입으로 만들 수 없고, 앱 시작 시 초기 데이터로만 생성
 @Slf4j
 @Component
+@Order(1) // 데모 데이터(DemoDataInitializer)보다 먼저 강사 계정을 만든다
 @RequiredArgsConstructor
 public class InstructorInitializer implements ApplicationRunner {
 
