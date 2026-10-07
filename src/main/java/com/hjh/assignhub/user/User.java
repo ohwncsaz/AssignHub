@@ -45,6 +45,10 @@ public class User {
     @Column(name = "password_change_required", nullable = false, columnDefinition = "boolean default false")
     private boolean passwordChangeRequired;
 
+    // ERD 추가 컬럼 — 프로필 사진 (업로드 폴더 기준 상대 경로, 없으면 null)
+    @Column(name = "profile_image_path", length = 500)
+    private String profileImagePath;
+
     private User(String email, String password, String name, String studentNo, Role role) {
         this.email = email;
         this.password = password;
@@ -79,6 +83,10 @@ public class User {
         if (isStudent()) {
             this.studentNo = studentNo;
         }
+    }
+
+    public void changeProfileImage(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
     }
 
     public void changePassword(String encodedPassword) {

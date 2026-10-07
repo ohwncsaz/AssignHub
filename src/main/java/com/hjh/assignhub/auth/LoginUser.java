@@ -23,6 +23,8 @@ public class LoginUser implements UserDetails {
     private final Role role;
     // true면 비밀번호 변경 화면 외에는 이용할 수 없다 (PasswordChangeRequiredInterceptor)
     private final boolean passwordChangeRequired;
+    // 상단바 아바타 표시용 (null이면 기본 아이콘)
+    private final String profileImagePath;
 
     public LoginUser(User user) {
         this.id = user.getId();
@@ -31,6 +33,7 @@ public class LoginUser implements UserDetails {
         this.name = user.getName();
         this.role = user.getRole();
         this.passwordChangeRequired = user.isPasswordChangeRequired();
+        this.profileImagePath = user.getProfileImagePath();
     }
 
     @Override

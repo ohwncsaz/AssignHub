@@ -23,7 +23,9 @@ public class PasswordChangeRequiredInterceptor implements HandlerInterceptor {
             return true;
         }
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        if (path.equals(PASSWORD_PAGE) || path.startsWith("/error")) {
+        // 비밀번호 변경 화면의 상단바 아바타(GET /profile/image)도 보여야 하므로 사진 보기만 함께 허용
+        boolean avatar = path.equals("/profile/image") && "GET".equals(request.getMethod());
+        if (path.equals(PASSWORD_PAGE) || avatar || path.startsWith("/error")) {
             return true;
         }
         response.sendRedirect(request.getContextPath() + PASSWORD_PAGE);
