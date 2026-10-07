@@ -52,6 +52,16 @@
         </div>
     </div>
 
+    <!-- 학생: 수강 중인 강좌 (내 강좌 화면과 같은 카드) -->
+    <th:block sec:authorize="hasRole('STUDENT')" th:if="${courseCards != null}">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="h5 mb-0 text-gray-800">수강 중인 강좌</h2>
+            <a th:href="@{/student/courses}" class="small" th:unless="${#lists.isEmpty(courseCards)}">내 강좌 전체 보기 &rarr;</a>
+        </div>
+        <th:block th:replace="~{fragments/course-cards :: courseCards(${courseCards})}"></th:block>
+        <h2 class="h5 mb-3 text-gray-800">바로가기</h2>
+    </th:block>
+
     <!-- 학생 바로가기 (내 통계 카드는 S5에서 추가) -->
     <div class="row" sec:authorize="hasRole('STUDENT')">
         <div class="col-xl-4 col-md-6 mb-4">
