@@ -19,14 +19,25 @@ spring:
   thymeleaf:
     cache: false
 
+  # 첨부파일 용량 제한 (과제 I3 · 제출 S3)
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
 server:
   error:
     whitelabel:
       enabled: false
+  tomcat:
+    # 용량 초과 요청도 끝까지 읽어서 연결이 끊기지 않고 안내 메시지로 돌아가게
+    max-swallow-size: -1
 
 # U4 초기 강사 계정 (개발용 기본값, 운영에서는 환경변수로 덮어쓰기)
 app:
+  # 첨부파일 저장 폴더 (git에는 올리지 않음)
+  upload-dir: ${UPLOAD_DIR:./uploads}
   instructor:
     email: ${INSTRUCTOR_EMAIL:instructor@test.com}
     password: ${INSTRUCTOR_PASSWORD:password123}
-    name: ${INSTRUCTOR_NAME:김강사}
+    name: ${INSTRUCTOR_NAME:stadmin}
