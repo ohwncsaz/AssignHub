@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>서버 오류</title>
+</head>
+<body>
+<!-- 500 등 서버 오류 — 스택 트레이스 같은 내부 정보는 화면에 노출하지 않는다 -->
+<div layout:fragment="content">
+    <div class="text-center">
+        <div class="error mx-auto" data-text="500" th:attr="data-text=${status}" th:text="${status}">500</div>
+        <p class="lead text-gray-800 mb-4">일시적인 오류가 발생했습니다</p>
+        <p class="text-gray-500 mb-4">잠시 후 다시 시도해 주세요. 문제가 계속되면 강사에게 알려 주세요.</p>
+        <a th:href="@{/}">&larr; 대시보드로 돌아가기</a>
+    </div>
+</div>
+</body>
+</html>
