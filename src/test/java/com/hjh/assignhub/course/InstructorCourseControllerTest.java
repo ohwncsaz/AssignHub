@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hjh.assignhub.auth.LoginUser;
+import com.hjh.assignhub.enrollment.Enrollment;
+import com.hjh.assignhub.enrollment.EnrollmentRepository;
 import com.hjh.assignhub.user.User;
 import com.hjh.assignhub.user.UserRepository;
 
@@ -41,6 +43,9 @@ class InstructorCourseControllerTest {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     private LoginUser instructor;
     private LoginUser otherInstructor;
@@ -95,6 +100,36 @@ class InstructorCourseControllerTest {
         mockMvc.perform(get("/instructor/courses/{id}", otherCourseId).with(user(instructor)))
                 .andExpect(status().isForbidden())
                 .andExpect(forwardedUrl("/error/403"));
+    }
+
+    @Test
+    @DisplayName("I2 강좌 상세에 등록한 학생만 학번·이름·이메일과 함께 보인다")
+    void detail_showsEnrolledStudents() throws Exception {
+        Long courseId = courseService.create(instructor.getId(), form("내 강좌"));
+        Long otherCourseId = courseService.create(instructor.getId(), form("다른 강좌"));
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        Course otherCourse = courseRepository.findById(otherCourseId).orElseThrow();
+        User enrolled = userRepository.save(User.createStudent("kim@test.com", "pw", "김학생", "20260011"));
+        User notEnrolled = userRepository.save(User.createStudent("lee@test.com", "pw", "이학생", "20260022"));
+        enrollmentRepository.save(new Enrollment(course, enrolled));
+        enrollmentRepository.save(new Enrollment(otherCourse, notEnrolled));
+
+        mockMvc.perform(get("/instructor/courses/{id}", courseId).with(user(instructor)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(Matchers.containsString("20260011")))
+                .andExpect(content().string(Matchers.containsString("김학생")))
+                .andExpect(content().string(Matchers.containsString("kim@test.com")))
+                .andExpect(content().string(Matchers.not(Matchers.containsString("이학생"))));
+    }
+
+    @Test
+    @DisplayName("I2 등록한 학생이 없으면 참여코드 공유 안내를 보여준다")
+    void detail_noStudents() throws Exception {
+        Long courseId = courseService.create(instructor.getId(), form("빈 강좌"));
+
+        mockMvc.perform(get("/instructor/courses/{id}", courseId).with(user(instructor)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(Matchers.containsString("아직 등록한 학생이 없습니다.")));
     }
 
     private CourseForm form(String name) {
