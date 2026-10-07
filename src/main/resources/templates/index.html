@@ -18,6 +18,16 @@
         <strong sec:authentication="principal.name">사용자</strong>님, 환영합니다.
     </p>
 
+    <!-- 강사: 내 강좌 (수강생 수 · 과제 수 · 진행중 · 평균 제출률) -->
+    <th:block sec:authorize="hasRole('INSTRUCTOR')" th:if="${courseOverviews != null}">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="h5 mb-0 text-gray-800">내 강좌</h2>
+            <a th:href="@{/instructor/courses}" class="small" th:unless="${#lists.isEmpty(courseOverviews)}">강좌 관리 &rarr;</a>
+        </div>
+        <th:block th:replace="~{fragments/instructor-course-cards :: instructorCourseCards(${courseOverviews})}"></th:block>
+        <h2 class="h5 mb-3 text-gray-800">바로가기</h2>
+    </th:block>
+
     <!-- 강사 바로가기 (통계 카드·차트는 I6에서 추가) -->
     <div class="row" sec:authorize="hasRole('INSTRUCTOR')">
         <div class="col-xl-4 col-md-6 mb-4">

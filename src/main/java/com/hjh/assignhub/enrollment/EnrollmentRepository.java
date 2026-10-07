@@ -7,9 +7,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.hjh.assignhub.common.IdCount;
+
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
 
     boolean existsByCourseIdAndStudentId(Long courseId, Long studentId);
+
+    // 강사 대시보드 — 강좌별 수강생 수
+    @Query("select e.course.id as id, count(e) as total from Enrollment e "
+            + "where e.course.instructor.id = :instructorId group by e.course.id")
+    List<IdCount> countByCourseOfInstructor(@Param("instructorId") Long instructorId);
 
     Optional<Enrollment> findByCourseIdAndStudentId(Long courseId, Long studentId);
 

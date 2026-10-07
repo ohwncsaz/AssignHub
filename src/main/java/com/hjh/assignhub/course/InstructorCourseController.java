@@ -1,5 +1,7 @@
 package com.hjh.assignhub.course;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,8 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.hjh.assignhub.assignment.AssignmentService;
 import com.hjh.assignhub.auth.LoginUser;
+import com.hjh.assignhub.course.CourseOverviewService.AssignmentProgress;
+import com.hjh.assignhub.enrollment.Enrollment;
 import com.hjh.assignhub.enrollment.EnrollmentService;
 
 import jakarta.validation.Valid;
@@ -24,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class InstructorCourseController {
 
     private final CourseService courseService;
-    private final AssignmentService assignmentService;
+    private final CourseOverviewService courseOverviewService;
     private final EnrollmentService enrollmentService;
 
     @GetMapping
@@ -51,10 +54,15 @@ public class InstructorCourseController {
 
     @GetMapping("/{id}")
     public String detail(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long id, Model model) {
-        Course course = courseService.getMyCourse(id, loginUser.getId());
+        Course course = courseService.getMyCourse(id, loginUser.getId()); // B5 본인 강좌만
+        List<Enrollment> enrollments = enrollmentService.findStudentsOfCourse(course.getId()); // I2
+        List<AssignmentProgress> progresses =
+                courseOverviewService.findAssignmentProgress(course.getId(), enrollments.size());
         model.addAttribute("course", course);
-        model.addAttribute("assignments", assignmentService.findByCourse(course.getId()));
-        model.addAttribute("enrollments", enrollmentService.findStudentsOfCourse(course.getId())); // I2
+        model.addAttribute("enrollments", enrollments);
+        // 과제별 제출/미제출 인원·비율과 강좌 평균 제출률
+        model.addAttribute("progresses", progresses);
+        model.addAttribute("averageRate", courseOverviewService.averageSubmissionRate(progresses));
         return "instructor/courses/detail";
     }
 
