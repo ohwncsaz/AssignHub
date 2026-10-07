@@ -63,6 +63,83 @@
         </div>
     </div>
 
+    <!-- S3 제출 · 재제출 -->
+    <div class="card shadow mb-4" id="submission">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">내 제출</h6>
+            <span th:if="${submission == null}" class="badge badge-secondary">미제출</span>
+            <span th:if="${submission != null and !submission.graded}" class="badge badge-success">제출 완료</span>
+            <span th:if="${submission != null and submission.graded}" class="badge badge-primary">채점 완료</span>
+        </div>
+        <div class="card-body">
+
+            <!-- 이미 제출한 내용 -->
+            <div th:if="${submission != null}" class="mb-4 pb-3 border-bottom">
+                <div class="small text-gray-500 mb-2">
+                    제출일시 <span class="date-cell" th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</span>
+                </div>
+                <div class="text-gray-800" style="white-space: pre-wrap" th:text="${submission.content}">제출 내용</div>
+                <div th:if="${submission.filePath != null}" class="mt-2">
+                    <a th:href="@{/student/assignments/{id}/submission/file(id=${assignment.id})}" class="small">
+                        <i class="fas fa-paperclip fa-sm mr-1"></i><span th:text="${submission.fileName}">report.pdf</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 제출할 수 없을 때 이유 표시 + 폼 비활성화 (화면에서 막는 것은 편의 — 서버에서도 B1 · B4를 다시 검사) -->
+            <div th:if="${!canSubmit}" class="alert alert-secondary small mb-3">
+                <i class="fas fa-lock fa-sm mr-1"></i><span th:text="${blockedReason}">지금은 제출 기간이 아닙니다.</span>
+            </div>
+
+            <form th:action="@{/student/assignments/{id}/submission(id=${assignment.id})}" th:object="${submissionForm}"
+                  method="post" enctype="multipart/form-data" novalidate>
+                <fieldset th:disabled="${!canSubmit}">
+                    <div class="form-group">
+                        <label for="content" class="font-weight-bold"
+                               th:text="${submission == null} ? '제출 내용' : '다시 제출할 내용'">제출 내용</label>
+                        <textarea th:field="*{content}" class="form-control" th:errorclass="is-invalid" rows="6"
+                                  placeholder="과제 답안, 깃허브 링크 등을 입력하세요."></textarea>
+                        <div class="invalid-feedback" th:errors="*{content}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file" class="font-weight-bold">첨부파일 <span class="small text-gray-500">(선택 · 10MB 이하)</span></label>
+                        <div th:if="${submission != null and submission.filePath != null}" class="custom-control custom-checkbox mb-2">
+                            <input type="checkbox" class="custom-control-input" th:field="*{removeFile}">
+                            <label class="custom-control-label small" th:for="${#ids.prev('removeFile')}">
+                                기존 첨부(<span th:text="${submission.fileName}">report.pdf</span>) 삭제
+                            </label>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file" name="file"
+                                   th:classappend="${#fields.hasErrors('file')} ? 'is-invalid'"
+                                   accept=".pdf,.txt,.md,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx,.csv,.zip,.png,.jpg,.jpeg,.gif,.java">
+                            <label class="custom-file-label" for="file">파일 선택</label>
+                            <div class="invalid-feedback" th:errors="*{file}"></div>
+                        </div>
+                        <div th:if="${submission != null}" class="small text-gray-500 mt-1">
+                            새 파일을 선택하면 기존 첨부가 교체되고, 선택하지 않으면 기존 첨부가 유지됩니다.
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-primary"
+                                th:text="${submission == null} ? '제출' : '다시 제출 (기존 제출 덮어쓰기)'">제출</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
 </div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        $('.custom-file-input').on('change', function () {
+            const name = this.files.length ? this.files[0].name : '파일 선택';
+            $(this).next('.custom-file-label').text(name);
+        });
+    </script>
+</th:block>
 </body>
 </html>

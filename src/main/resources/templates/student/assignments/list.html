@@ -35,6 +35,7 @@
                     <thead>
                     <tr>
                         <th>상태</th>
+                        <th>제출</th>
                         <th class="col-main">과제</th>
                         <th>강좌</th>
                         <th>제출 기간</th>
@@ -47,6 +48,9 @@
                         th:classappend="${a.closingSoon} ? 'table-warning'">
                         <td class="text-nowrap">
                             <th:block th:replace="~{fragments/assignment :: statusBadge(${a})}"></th:block>
+                        </td>
+                        <td class="text-nowrap">
+                            <th:block th:replace="~{fragments/assignment :: submissionBadge(${submissionStatus.get(a.id)})}"></th:block>
                         </td>
                         <td>
                             <a th:href="@{/student/assignments/{id}(id=${a.id})}" th:text="${a.title}">과제 제목</a>

@@ -9,6 +9,13 @@
           th:text="${a.remainingText}">D-3</span>
 </th:block>
 
+<!-- 학생의 제출 여부 (status: SubmissionStatus 또는 null) -->
+<th:block th:fragment="submissionBadge(status)">
+    <span th:if="${status == null}" class="badge badge-light">미제출</span>
+    <span th:if="${status != null and status.name() == 'SUBMITTED'}" class="badge badge-success">제출함</span>
+    <span th:if="${status != null and status.name() == 'GRADED'}" class="badge badge-primary">채점 완료</span>
+</th:block>
+
 <!-- 제출 기간 — 날짜가 중간에서 쪼개지지 않도록 시작/종료를 각각 한 줄로 -->
 <th:block th:fragment="period(a)">
     <span class="date-cell" th:text="${#temporals.format(a.startAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 09:00</span> ~<br>

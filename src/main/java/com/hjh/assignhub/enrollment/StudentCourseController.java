@@ -15,6 +15,7 @@ import com.hjh.assignhub.assignment.StudentAssignmentService;
 import com.hjh.assignhub.auth.LoginUser;
 import com.hjh.assignhub.common.FormFieldException;
 import com.hjh.assignhub.course.Course;
+import com.hjh.assignhub.submission.SubmissionService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class StudentCourseController {
     private final EnrollmentService enrollmentService;
     private final StudentAssignmentService studentAssignmentService;
     private final MyCourseCardService myCourseCardService;
+    private final SubmissionService submissionService;
 
     @GetMapping
     public String myCourses(@AuthenticationPrincipal LoginUser loginUser, Model model) {
@@ -38,6 +40,7 @@ public class StudentCourseController {
     public String detail(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long courseId, Model model) {
         model.addAttribute("enrollment", enrollmentService.getMyEnrollment(courseId, loginUser.getId())); // B2
         model.addAttribute("assignments", studentAssignmentService.findMyAssignmentsInCourse(loginUser.getId(), courseId));
+        model.addAttribute("submissionStatus", submissionService.findMyStatusByAssignment(loginUser.getId()));
         return "student/courses/detail";
     }
 

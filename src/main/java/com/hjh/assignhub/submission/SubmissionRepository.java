@@ -1,6 +1,7 @@
 package com.hjh.assignhub.submission;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +22,12 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
     List<IdCount> countByCourseOfInstructor(@Param("instructorId") Long instructorId);
 
     boolean existsByAssignmentId(Long assignmentId);
+
+    // B3 과제당 학생 1건 — 있으면 재제출(덮어쓰기)
+    Optional<Submission> findByAssignmentIdAndStudentId(Long assignmentId, Long studentId);
+
+    // 내 과제 목록의 제출 여부 표시용
+    List<Submission> findByStudentId(Long studentId);
 
     // 해당 강좌의 과제 중 이 학생이 제출한 것이 있는지 (수강생 내보내기 검사)
     boolean existsByStudentIdAndAssignmentCourseId(Long studentId, Long courseId);
