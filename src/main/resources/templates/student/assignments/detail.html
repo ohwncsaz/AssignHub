@@ -15,11 +15,10 @@
                 <span th:text="${assignment.course.name}">강좌명</span> ·
                 <span th:text="${assignment.course.instructor.name}">강사</span>
             </div>
-            <h1 class="h3 mb-0 text-gray-800">
-                <span class="badge align-middle mr-1" th:classappend="'badge-' + ${assignment.status.badge}"
-                      th:text="${assignment.status.label}">진행중</span>
-                <span th:text="${assignment.title}">과제 제목</span>
-            </h1>
+            <h1 class="h3 mb-1 text-gray-800" th:text="${assignment.title}">과제 제목</h1>
+            <div>
+                <th:block th:replace="~{fragments/assignment :: statusBadge(${assignment})}"></th:block>
+            </div>
         </div>
         <a th:href="@{/student/assignments}" class="btn btn-sm btn-outline-secondary mt-2 mt-sm-0">
             <i class="fas fa-arrow-left fa-sm mr-1"></i> 내 과제
@@ -32,8 +31,8 @@
                 <div class="card-body">
                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">제출 기간</div>
                     <div class="text-gray-800">
-                        <span th:text="${#temporals.format(assignment.startAt, 'yyyy-MM-dd HH:mm')}">시작</span> ~<br>
-                        <span th:text="${#temporals.format(assignment.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
+                        <span class="date-cell" th:text="${#temporals.format(assignment.startAt, 'yyyy-MM-dd HH:mm')}">시작</span> ~<br>
+                        <span class="date-cell" th:text="${#temporals.format(assignment.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,43 @@
+/* AssignHub 공통 스타일 — SB Admin 2 위에 덮어쓰는 최소한의 보정 */
+
+/* 한글이 글자 단위로 쪼개지지 않도록 어절(띄어쓰기) 단위로 줄바꿈
+   (기본값이면 좁은 표에서 "김/민/준", "내/보/내/기"처럼 세로로 쪼개진다)
+   아주 긴 단어(이메일 등)는 넘칠 때만 줄바꿈 — break-word는 표 열 최소 너비 계산에 영향을 주지 않는다 */
+body {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+/* 버튼 · 배지 · 날짜는 한 줄 유지 */
+.btn,
+.badge,
+.date-cell {
+    white-space: nowrap;
+}
+
+/* 단, 칸 폭을 꽉 채우는 버튼(btn-block)은 좁아지면 줄바꿈 — 한 줄 고정이면 글자가 버튼 밖으로 넘친다 */
+.btn-block {
+    white-space: normal;
+}
+
+.table td,
+.table th {
+    vertical-align: middle;
+}
+
+/* 표의 주 내용 열(강좌명 · 과제명)이 다른 열에 밀려 너무 좁아지지 않게 */
+.col-main {
+    min-width: 10rem;
+}
+
+/* 아직 구현되지 않은 사이드바 메뉴 */
+.sidebar .nav-item .nav-link.disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.sidebar .nav-item .nav-link .badge-soon {
+    font-size: 0.6rem;
+    vertical-align: middle;
+    margin-left: 0.25rem;
+}

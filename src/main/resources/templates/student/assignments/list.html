@@ -34,28 +34,27 @@
                 <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
-                        <th style="width: 80px">상태</th>
-                        <th style="width: 180px">강좌</th>
-                        <th>과제</th>
-                        <th style="width: 300px">제출 기간</th>
-                        <th style="width: 70px">배점</th>
+                        <th>상태</th>
+                        <th class="col-main">과제</th>
+                        <th>강좌</th>
+                        <th>제출 기간</th>
+                        <th>배점</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="a : ${assignments}" th:attr="data-status=${a.status.name()}">
-                        <td class="text-center">
-                            <span class="badge" th:classappend="'badge-' + ${a.status.badge}"
-                                  th:text="${a.status.label}">진행중</span>
+                    <!-- 마감 임박(24시간 이내) 과제는 행을 강조 -->
+                    <tr th:each="a : ${assignments}" th:attr="data-status=${a.status.name()}"
+                        th:classappend="${a.closingSoon} ? 'table-warning'">
+                        <td class="text-nowrap">
+                            <th:block th:replace="~{fragments/assignment :: statusBadge(${a})}"></th:block>
                         </td>
-                        <td class="small" th:text="${a.course.name}">강좌명</td>
                         <td>
                             <a th:href="@{/student/assignments/{id}(id=${a.id})}" th:text="${a.title}">과제 제목</a>
                             <i th:if="${a.filePath != null}" class="fas fa-paperclip fa-sm text-gray-500 ml-1"></i>
                         </td>
+                        <td class="small" th:text="${a.course.name}">강좌명</td>
                         <td class="small">
-                            <span th:text="${#temporals.format(a.startAt, 'yyyy-MM-dd HH:mm')}">시작</span>
-                            ~
-                            <span th:text="${#temporals.format(a.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
+                            <th:block th:replace="~{fragments/assignment :: period(${a})}"></th:block>
                         </td>
                         <td class="text-center" th:text="${a.maxScore}">100</td>
                     </tr>

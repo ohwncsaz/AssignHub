@@ -22,15 +22,16 @@
             <div class="card border-left-success shadow h-100 py-2">
                 <div class="card-body">
                     <div class="text-xs font-weight-bold text-success text-uppercase mb-2">참여코드</div>
-                    <div class="d-flex align-items-center">
-                        <span id="joinCode" class="h3 mb-0 font-weight-bold text-gray-800 mr-3"
-                              style="letter-spacing: 0.15em" th:text="${course.joinCode}">ABCD2345</span>
-                        <button type="button" id="copyJoinCode" class="btn btn-sm btn-outline-success">
+                    <!-- 코드는 한 줄에 크게, 버튼은 아래 줄로 (좁은 카드에서 버튼이 카드 밖으로 밀려나지 않게) -->
+                    <div id="joinCode" class="h3 mb-2 font-weight-bold text-gray-800 text-nowrap"
+                         style="letter-spacing: 0.15em" th:text="${course.joinCode}">ABCD2345</div>
+                    <div class="d-flex flex-wrap">
+                        <button type="button" id="copyJoinCode" class="btn btn-sm btn-outline-success mr-1 mb-1">
                             <i class="fas fa-copy fa-sm"></i> 복사
                         </button>
                         <!-- 코드가 유출됐을 때 재발급 — 이미 등록한 학생은 영향 없음 -->
                         <form th:action="@{/instructor/courses/{id}/join-code(id=${course.id})}" method="post"
-                              class="ml-1" onsubmit="return confirm('참여코드를 재발급할까요? 이전 코드로는 더 이상 등록할 수 없습니다.');">
+                              class="mb-1" onsubmit="return confirm('참여코드를 재발급할까요? 이전 코드로는 더 이상 등록할 수 없습니다.');">
                             <button type="submit" class="btn btn-sm btn-outline-secondary" title="참여코드 재발급">
                                 <i class="fas fa-sync-alt fa-sm"></i> 재발급
                             </button>
@@ -78,21 +79,20 @@
                 등록된 과제가 없습니다.
             </div>
             <div class="table-responsive" th:unless="${#lists.isEmpty(assignments)}">
-                <table class="table table-bordered align-middle">
+                <table class="table table-bordered">
                     <thead>
                     <tr>
-                        <th style="width: 80px">상태</th>
-                        <th>제목</th>
-                        <th style="width: 300px">제출 기간</th>
-                        <th style="width: 70px">배점</th>
-                        <th style="width: 140px">관리</th>
+                        <th>상태</th>
+                        <th class="col-main">제목</th>
+                        <th>제출 기간</th>
+                        <th>배점</th>
+                        <th>관리</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="a : ${assignments}">
-                        <td class="text-center">
-                            <span class="badge" th:classappend="'badge-' + ${a.status.badge}"
-                                  th:text="${a.status.label}">진행중</span>
+                        <td class="text-nowrap">
+                            <th:block th:replace="~{fragments/assignment :: statusBadge(${a})}"></th:block>
                         </td>
                         <td>
                             <span th:text="${a.title}">과제 제목</span>
@@ -102,9 +102,7 @@
                             </a>
                         </td>
                         <td class="small">
-                            <span th:text="${#temporals.format(a.startAt, 'yyyy-MM-dd HH:mm')}">시작</span>
-                            ~
-                            <span th:text="${#temporals.format(a.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
+                            <th:block th:replace="~{fragments/assignment :: period(${a})}"></th:block>
                         </td>
                         <td class="text-center" th:text="${a.maxScore}">100</td>
                         <td class="text-center text-nowrap">
@@ -145,25 +143,25 @@
                 <table class="table table-bordered">
                     <thead>
                     <tr>
-                        <th style="width: 60px">No</th>
-                        <th style="width: 140px">학번</th>
-                        <th style="width: 140px">이름</th>
+                        <th>No</th>
+                        <th>학번</th>
+                        <th>이름</th>
                         <th>이메일</th>
-                        <th style="width: 180px">등록일시</th>
-                        <th style="width: 100px">관리</th>
+                        <th>등록일시</th>
+                        <th>관리</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="e, stat : ${enrollments}">
                         <td class="text-center" th:text="${stat.count}">1</td>
                         <td th:text="${e.student.studentNo}">20260001</td>
-                        <td>
+                        <td class="text-nowrap">
                             <span th:text="${e.student.name}">홍길동</span>
                             <span th:if="${e.student.passwordChangeRequired}" class="badge badge-warning ml-1"
                                   title="강사가 만든 계정 — 아직 초기 비밀번호(학번)를 바꾸지 않았습니다">첫 로그인 전</span>
                         </td>
                         <td th:text="${e.student.email}">hong@test.com</td>
-                        <td th:text="${#temporals.format(e.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
+                        <td class="date-cell" th:text="${#temporals.format(e.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
                         <td class="text-center">
                             <form th:action="@{/instructor/courses/{cid}/students/{sid}/remove(cid=${course.id},sid=${e.student.id})}"
                                   method="post" class="d-inline"

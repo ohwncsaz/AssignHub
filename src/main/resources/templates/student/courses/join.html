@@ -55,16 +55,16 @@
                 <table class="table table-bordered">
                     <thead>
                     <tr>
-                        <th>강좌명</th>
-                        <th style="width: 160px">강사</th>
-                        <th style="width: 180px">등록일시</th>
+                        <th class="col-main">강좌명</th>
+                        <th>강사</th>
+                        <th>등록일시</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="enrollment : ${enrollments}">
                         <td th:text="${enrollment.course.name}">강좌명</td>
                         <td th:text="${enrollment.course.instructor.name}">강사</td>
-                        <td th:text="${#temporals.format(enrollment.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
+                        <td class="date-cell" th:text="${#temporals.format(enrollment.joinedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</td>
                     </tr>
                     </tbody>
                 </table>

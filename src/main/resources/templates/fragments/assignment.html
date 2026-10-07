@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<!-- 과제 상태 배지(예정 · 진행중 · 마감) + 진행중일 때 남은 시간 (24시간 이내는 빨간색 = 마감 임박) -->
+<th:block th:fragment="statusBadge(a)">
+    <span class="badge" th:classappend="'badge-' + ${a.status.badge}" th:text="${a.status.label}">진행중</span>
+    <span th:if="${a.remainingText != null}" class="badge ml-1"
+          th:classappend="${a.closingSoon} ? 'badge-danger' : 'badge-light'"
+          th:text="${a.remainingText}">D-3</span>
+</th:block>
+
+<!-- 제출 기간 — 날짜가 중간에서 쪼개지지 않도록 시작/종료를 각각 한 줄로 -->
+<th:block th:fragment="period(a)">
+    <span class="date-cell" th:text="${#temporals.format(a.startAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 09:00</span> ~<br>
+    <span class="date-cell" th:text="${#temporals.format(a.endAt, 'yyyy-MM-dd HH:mm')}">2026-10-14 23:59</span>
+</th:block>
+
+</html>
