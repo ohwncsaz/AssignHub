@@ -69,11 +69,11 @@
                 <span>내 과제</span>
             </a>
         </li>
-        <!-- S4 결과 확인(W3)은 아직 없음 — 눌러서 404가 나지 않도록 비활성화 -->
-        <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true" onclick="return false;">
+        <!-- S4 결과 확인 -->
+        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/student/submissions')} ? 'active'">
+            <a class="nav-link" th:href="@{/student/submissions}">
                 <i class="fas fa-fw fa-file-alt"></i>
-                <span>내 제출</span><span class="badge badge-light badge-soon">준비 중</span>
+                <span>내 제출</span>
             </a>
         </li>
     </th:block>

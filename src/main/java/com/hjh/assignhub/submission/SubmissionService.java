@@ -1,6 +1,7 @@
 package com.hjh.assignhub.submission;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -66,6 +67,11 @@ public class SubmissionService {
         }
         return submissionRepository.save(new Submission(
                 assignment, userRepository.getReferenceById(studentId), form.getContent(), newFilePath));
+    }
+
+    // S4 결과 확인 — 본인 제출만 (다른 학생 id를 받지 않는다)
+    public List<Submission> findMySubmissions(Long studentId) {
+        return submissionRepository.findMySubmissions(studentId);
     }
 
     public Optional<Submission> findMySubmission(Long assignmentId, Long studentId) {

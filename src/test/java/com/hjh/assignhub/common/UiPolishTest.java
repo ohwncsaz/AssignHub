@@ -113,14 +113,13 @@ class UiPolishTest {
     }
 
     @Test
-    @DisplayName("사이드바: 아직 없는 메뉴(통계·내 제출)는 링크 대신 '준비 중'으로 표시되어 404로 가지 않는다")
+    @DisplayName("사이드바: 아직 없는 메뉴(통계 I6)는 '준비 중'으로 비활성화, 구현된 내 제출(S4)은 링크로 열린다")
     void sidebar_unbuiltMenusDisabled() throws Exception {
         mockMvc.perform(get("/").with(user(instructor)))
                 .andExpect(content().string(Matchers.containsString("준비 중")))
                 .andExpect(content().string(Matchers.not(Matchers.containsString("href=\"/instructor/stats\""))));
         mockMvc.perform(get("/").with(user(student)))
-                .andExpect(content().string(Matchers.containsString("준비 중")))
-                .andExpect(content().string(Matchers.not(Matchers.containsString("href=\"/student/submissions\""))));
+                .andExpect(content().string(Matchers.containsString("href=\"/student/submissions\"")));
     }
 
     // ---------------------------------------------------------------- 세션 만료
