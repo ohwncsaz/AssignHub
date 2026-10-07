@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.hjh.assignhub.auth.SessionExpiredAwareAccessDeniedHandler;
+
 @Configuration
 public class SecurityConfig {
 
@@ -30,8 +32,8 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout"))
-                // 역할이 맞지 않는 URL 접근 → 403 페이지
-                .exceptionHandling(ex -> ex.accessDeniedPage("/error/403"));
+                // 역할이 맞지 않는 URL 접근 → 403 페이지 (세션 만료로 인한 CSRF 오류는 로그인 화면으로)
+                .exceptionHandling(ex -> ex.accessDeniedHandler(new SessionExpiredAwareAccessDeniedHandler("/error/403")));
         return http.build();
     }
 

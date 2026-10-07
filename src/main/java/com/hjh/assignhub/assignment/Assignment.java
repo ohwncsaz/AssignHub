@@ -1,6 +1,8 @@
 package com.hjh.assignhub.assignment;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import com.hjh.assignhub.course.Course;
 
@@ -92,6 +94,37 @@ public class Assignment {
 
     public AssignmentStatus getStatus() {
         return statusAt(LocalDateTime.now());
+    }
+
+    // 진행중 과제의 남은 시간 — 24시간 미만은 "N시간 남음"/"N분 남음", 그 이상은 달력 기준 "D-N"
+    public String remainingTextAt(LocalDateTime now) {
+        if (statusAt(now) != AssignmentStatus.OPEN) {
+            return null;
+        }
+        Duration left = Duration.between(now, endAt);
+        if (left.toMinutes() < 1) {
+            return "곧 마감";
+        }
+        if (left.toHours() < 1) {
+            return left.toMinutes() + "분 남음";
+        }
+        if (left.toHours() < 24) {
+            return left.toHours() + "시간 남음";
+        }
+        return "D-" + ChronoUnit.DAYS.between(now.toLocalDate(), endAt.toLocalDate());
+    }
+
+    // 마감 임박 — 진행중이면서 24시간 이내 마감
+    public boolean isClosingSoonAt(LocalDateTime now) {
+        return statusAt(now) == AssignmentStatus.OPEN && Duration.between(now, endAt).toHours() < 24;
+    }
+
+    public String getRemainingText() {
+        return remainingTextAt(LocalDateTime.now());
+    }
+
+    public boolean isClosingSoon() {
+        return isClosingSoonAt(LocalDateTime.now());
     }
 
     public String getFileName() {

@@ -4,8 +4,9 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <!-- U3 역할별 메뉴 — 강사/학생 사이드바 분리 -->
+<!-- currentPath: CurrentPathAdvice가 넘겨주는 현재 경로 — 지금 보고 있는 메뉴에 active 표시 -->
 <ul th:fragment="sidebar" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
-    id="accordionSidebar">
+    id="accordionSidebar" th:with="path=${currentPath ?: ''}">
 
     <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/}">
         <div class="sidebar-brand-icon rotate-n-15">
@@ -16,7 +17,7 @@
 
     <hr class="sidebar-divider my-0">
 
-    <li class="nav-item">
+    <li class="nav-item" th:classappend="${path == '/'} ? 'active'">
         <a class="nav-link" th:href="@{/}">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>대시보드</span>
@@ -27,16 +28,19 @@
         <hr class="sidebar-divider">
         <div class="sidebar-heading">강사</div>
 
-        <li class="nav-item">
+        <!-- 과제 등록·수정, 수강생 추가도 강좌 관리 아래 화면이므로 같이 강조 -->
+        <li class="nav-item"
+            th:classappend="${#strings.startsWith(path, '/instructor/courses') or #strings.startsWith(path, '/instructor/assignments')} ? 'active'">
             <a class="nav-link" th:href="@{/instructor/courses}">
                 <i class="fas fa-fw fa-chalkboard-teacher"></i>
                 <span>강좌 관리</span>
             </a>
         </li>
+        <!-- I6 통계(W4)는 아직 없음 — 눌러서 404가 나지 않도록 비활성화 -->
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/instructor/stats}">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true" onclick="return false;">
                 <i class="fas fa-fw fa-chart-bar"></i>
-                <span>통계</span>
+                <span>통계</span><span class="badge badge-light badge-soon">준비 중</span>
             </a>
         </li>
     </th:block>
@@ -45,22 +49,23 @@
         <hr class="sidebar-divider">
         <div class="sidebar-heading">학생</div>
 
-        <li class="nav-item">
+        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/student/courses')} ? 'active'">
             <a class="nav-link" th:href="@{/student/courses/join}">
                 <i class="fas fa-fw fa-key"></i>
                 <span>수강 등록</span>
             </a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/student/assignments')} ? 'active'">
             <a class="nav-link" th:href="@{/student/assignments}">
                 <i class="fas fa-fw fa-tasks"></i>
                 <span>내 과제</span>
             </a>
         </li>
+        <!-- S4 결과 확인(W3)은 아직 없음 — 눌러서 404가 나지 않도록 비활성화 -->
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/student/submissions}">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true" onclick="return false;">
                 <i class="fas fa-fw fa-file-alt"></i>
-                <span>내 제출</span>
+                <span>내 제출</span><span class="badge badge-light badge-soon">준비 중</span>
             </a>
         </li>
     </th:block>
