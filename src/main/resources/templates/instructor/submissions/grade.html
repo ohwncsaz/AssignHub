@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>채점</title>
+</head>
+<body>
+<div layout:fragment="content" th:with="a=${submission.assignment}">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <div class="small text-gray-600 mb-1">
+                <span th:text="${a.course.name}">강좌명</span> · <span th:text="${a.title}">과제 제목</span>
+            </div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <span th:text="${submission.student.name}">홍길동</span>
+                <small class="text-gray-500" th:text="${submission.student.studentNo}">20260001</small>
+                <span th:if="${submission.graded}" class="badge badge-primary align-middle ml-1">채점 완료</span>
+            </h1>
+        </div>
+        <a th:href="@{/instructor/assignments/{id}/submissions(id=${a.id})}" class="btn btn-sm btn-outline-secondary mt-2 mt-sm-0">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 제출 현황
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- 제출물 -->
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">제출 내용</h6>
+                    <span class="small text-gray-500">
+                        제출 <span class="date-cell" th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</span>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="text-gray-800" style="white-space: pre-wrap" th:text="${submission.content}">제출 내용</div>
+                    <div th:if="${submission.filePath != null}" class="mt-4 pt-3 border-top">
+                        <a th:href="@{/instructor/submissions/{id}/file(id=${submission.id})}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-download fa-sm mr-1"></i><span th:text="${submission.fileName}">report.pdf</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- I5 채점 · 피드백 (B6 점수는 0 이상 배점 이하) -->
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">채점</h6>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/instructor/submissions/{id}/grade(id=${submission.id})}" th:object="${gradeForm}"
+                          method="post" novalidate>
+                        <div class="form-group">
+                            <label for="score" class="font-weight-bold">
+                                점수 <span class="small text-gray-500">(0 ~ <span th:text="${a.maxScore}">100</span>점)</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number" th:field="*{score}" class="form-control" th:errorclass="is-invalid"
+                                       min="0" th:max="${a.maxScore}" step="1">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">/ <span th:text="${a.maxScore}">100</span></span>
+                                </div>
+                                <div class="invalid-feedback" th:errors="*{score}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="feedback" class="font-weight-bold">피드백 <span class="small text-gray-500">(선택)</span></label>
+                            <textarea th:field="*{feedback}" class="form-control" th:errorclass="is-invalid" rows="6"
+                                      placeholder="잘한 점, 고칠 점 등을 학생에게 남겨 주세요."></textarea>
+                            <div class="invalid-feedback" th:errors="*{feedback}"></div>
+                        </div>
+                        <div class="small text-gray-500 mb-3">
+                            채점하면 학생은 이 과제를 다시 제출할 수 없습니다. (B4)
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block"
+                                th:text="${submission.graded} ? '채점 수정' : '채점 완료'">채점 완료</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

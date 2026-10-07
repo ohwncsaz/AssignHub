@@ -23,6 +23,19 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     boolean existsByAssignmentId(Long assignmentId);
 
+    // B6 유지 — 이미 준 최고 점수보다 배점을 낮출 수 없게 (채점된 것이 없으면 null)
+    @Query("select max(s.score) from Submission s where s.assignment.id = :assignmentId")
+    Integer findMaxScoreByAssignmentId(@Param("assignmentId") Long assignmentId);
+
+    // I4 과제별 제출물 (제출한 학생 정보 함께)
+    @Query("select s from Submission s join fetch s.student where s.assignment.id = :assignmentId")
+    List<Submission> findByAssignmentIdWithStudent(@Param("assignmentId") Long assignmentId);
+
+    // I5 채점 화면 — 과제 · 강좌(본인 강좌 확인용) · 학생 정보 함께
+    @Query("select s from Submission s join fetch s.assignment a join fetch a.course join fetch s.student "
+            + "where s.id = :id")
+    Optional<Submission> findDetailById(@Param("id") Long id);
+
     // B3 과제당 학생 1건 — 있으면 재제출(덮어쓰기)
     Optional<Submission> findByAssignmentIdAndStudentId(Long assignmentId, Long studentId);
 
