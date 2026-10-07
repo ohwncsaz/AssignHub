@@ -9,6 +9,7 @@ spring:
       ddl-auto: create-drop
 
 app:
+  remember-me-key: test-remember-me-key
   upload-dir: build/test-uploads
   instructor:
     email: instructor@test.com

@@ -46,3 +46,8 @@ body {
 .custom-file-label::after {
     content: "찾아보기";
 }
+
+/* 로그인 화면 왼쪽 그림 — SB Admin 2 원본의 외부 이미지(source.unsplash.com)는 서비스 종료(503)로 열리지 않아 프로젝트 이미지로 대체 */
+.bg-login-image {
+    background: url("../img/login-side.svg") center / cover no-repeat;
+}
