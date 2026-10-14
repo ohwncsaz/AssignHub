@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- U3 역할별 메뉴 — 강사/학생 사이드바 분리 -->
+<!-- currentPath: CurrentPathAdvice가 넘겨주는 현재 경로 — 지금 보고 있는 메뉴에 active 표시 -->
+<ul th:fragment="sidebar" class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion"
+    id="accordionSidebar" th:with="path=${currentPath ?: ''}">
+
+    <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/}">
+        <div class="sidebar-brand-icon rotate-n-15">
+            <i class="fas fa-clipboard-check"></i>
+        </div>
+        <div class="sidebar-brand-text mx-3">AssignHub</div>
+    </a>
+
+    <hr class="sidebar-divider my-0">
+
+    <li class="nav-item" th:classappend="${path == '/'} ? 'active'">
+        <a class="nav-link" th:href="@{/}">
+            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <span>대시보드</span>
+        </a>
+    </li>
+
+    <th:block sec:authorize="hasRole('INSTRUCTOR')">
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">강사</div>
+
+        <!-- 과제 등록·수정, 수강생 추가도 강좌 관리 아래 화면이므로 같이 강조 -->
+        <li class="nav-item"
+            th:classappend="${#strings.startsWith(path, '/instructor/courses') or #strings.startsWith(path, '/instructor/assignments') or #strings.startsWith(path, '/instructor/submissions')} ? 'active'">
+            <a class="nav-link" th:href="@{/instructor/courses}">
+                <i class="fas fa-fw fa-chalkboard-teacher"></i>
+                <span>강좌 관리</span>
+            </a>
+        </li>
+        <!-- I6 통계 대시보드 -->
+        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/instructor/stats')} ? 'active'">
+            <a class="nav-link" th:href="@{/instructor/stats}">
+                <i class="fas fa-fw fa-chart-bar"></i>
+                <span>통계</span>
+            </a>
+        </li>
+    </th:block>
+
+    <th:block sec:authorize="hasRole('STUDENT')">
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">학생</div>
+
+        <!-- 내 강좌: 목록(/student/courses)과 강좌 상세(/student/courses/{id}) — 수강 등록(/join)은 별도 메뉴 -->
+        <li class="nav-item"
+            th:classappend="${#strings.startsWith(path, '/student/courses') and path != '/student/courses/join'} ? 'active'">
+            <a class="nav-link" th:href="@{/student/courses}">
+                <i class="fas fa-fw fa-book-open"></i>
+                <span>내 강좌</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${path == '/student/courses/join'} ? 'active'">
+            <a class="nav-link" th:href="@{/student/courses/join}">
+                <i class="fas fa-fw fa-key"></i>
+                <span>수강 등록</span>
+            </a>
+        </li>
+        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/student/assignments')} ? 'active'">
+            <a class="nav-link" th:href="@{/student/assignments}">
+                <i class="fas fa-fw fa-tasks"></i>
+                <span>내 과제</span>
+            </a>
+        </li>
+        <!-- S4 결과 확인 -->
+        <li class="nav-item" th:classappend="${#strings.startsWith(path, '/student/submissions')} ? 'active'">
+            <a class="nav-link" th:href="@{/student/submissions}">
+                <i class="fas fa-fw fa-file-alt"></i>
+                <span>내 제출</span>
+            </a>
+        </li>
+    </th:block>
+
+    <hr class="sidebar-divider d-none d-md-block">
+
+    <div class="text-center d-none d-md-inline">
+        <button class="rounded-circle border-0" id="sidebarToggle"></button>
+    </div>
+</ul>
+
+</html>

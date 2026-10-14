@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<!-- 강사의 강좌 카드 (CourseOverviewService.CourseOverview) — 강사 대시보드에서 사용 -->
+<th:block th:fragment="instructorCourseCards(overviews)">
+    <div th:if="${#lists.isEmpty(overviews)}" class="card shadow mb-4">
+        <div class="card-body text-center text-gray-500 py-5">
+            <p class="mb-2">아직 개설한 강좌가 없습니다.</p>
+            <a th:href="@{/instructor/courses}" class="small">강좌 관리에서 첫 강좌 개설하기 &rarr;</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4" th:each="o : ${overviews}">
+            <!-- 카드 전체가 강좌 상세 링크 -->
+            <a th:href="@{/instructor/courses/{id}(id=${o.course.id})}" class="text-decoration-none">
+                <div class="card border-left-primary shadow h-100">
+                    <div class="card-body">
+                        <div class="h5 font-weight-bold text-gray-800 mb-1" th:text="${o.course.name}">강좌명</div>
+                        <div class="small text-gray-500 mb-3">
+                            참여코드 <code th:text="${o.course.joinCode}">ABCD2345</code>
+                        </div>
+
+                        <div class="d-flex mb-3 text-center">
+                            <div class="flex-fill">
+                                <div class="h4 mb-0 font-weight-bold text-info" th:text="${o.students}">0</div>
+                                <div class="small text-gray-600">수강생</div>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="h4 mb-0 font-weight-bold text-primary" th:text="${o.assignments}">0</div>
+                                <div class="small text-gray-600">과제</div>
+                            </div>
+                            <div class="flex-fill">
+                                <div class="h4 mb-0 font-weight-bold text-success" th:text="${o.open}">0</div>
+                                <div class="small text-gray-600">진행중</div>
+                            </div>
+                        </div>
+
+                        <!-- 평균 제출률 (시작된 과제 기준) -->
+                        <th:block th:if="${o.submissionRate != null}">
+                            <div class="d-flex justify-content-between small text-gray-600 mb-1">
+                                <span>평균 제출률</span>
+                                <span class="font-weight-bold" th:text="|${o.submissionRate}%|">75%</span>
+                            </div>
+                            <div class="progress progress-sm">
+                                <div class="progress-bar bg-warning" role="progressbar"
+                                     th:style="|width: ${o.submissionRate}%|"></div>
+                            </div>
+                        </th:block>
+                        <div th:if="${o.submissionRate == null}" class="small text-gray-500">시작된 과제 없음</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</th:block>
+
+</html>

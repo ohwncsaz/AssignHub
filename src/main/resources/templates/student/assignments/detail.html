@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title th:text="${assignment.title}">과제</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <div class="small text-gray-600 mb-1">
+                <span th:text="${assignment.course.name}">강좌명</span> ·
+                <span th:text="${assignment.course.instructor.name}">강사</span>
+            </div>
+            <h1 class="h3 mb-1 text-gray-800" th:text="${assignment.title}">과제 제목</h1>
+            <div>
+                <th:block th:replace="~{fragments/assignment :: statusBadge(${assignment})}"></th:block>
+            </div>
+        </div>
+        <a th:href="@{/student/assignments}" class="btn btn-sm btn-outline-secondary mt-2 mt-sm-0">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 내 과제
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">제출 기간</div>
+                    <div class="text-gray-800">
+                        <span class="date-cell" th:text="${#temporals.format(assignment.startAt, 'yyyy-MM-dd HH:mm')}">시작</span> ~<br>
+                        <span class="date-cell" th:text="${#temporals.format(assignment.endAt, 'yyyy-MM-dd HH:mm')}">종료</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">배점</div>
+                    <div class="h5 mb-0 text-gray-800"><span th:text="${assignment.maxScore}">100</span>점</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">과제 내용</h6>
+        </div>
+        <div class="card-body">
+            <!-- 줄바꿈 유지, th:text라 HTML은 이스케이프됨 -->
+            <div class="text-gray-800" style="white-space: pre-wrap" th:text="${assignment.content}">내용</div>
+
+            <div th:if="${assignment.filePath != null}" class="mt-4 pt-3 border-top">
+                <a th:href="@{/student/assignments/{id}/file(id=${assignment.id})}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-download fa-sm mr-1"></i><span th:text="${assignment.fileName}">file.pdf</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- S3 제출 · 재제출 -->
+    <div class="card shadow mb-4" id="submission">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">내 제출</h6>
+            <span th:if="${submission == null}" class="badge badge-secondary">미제출</span>
+            <span th:if="${submission != null and !submission.graded}" class="badge badge-success">제출 완료</span>
+            <span th:if="${submission != null and submission.graded}" class="badge badge-primary">채점 완료</span>
+        </div>
+        <div class="card-body">
+
+            <!-- S4 결과: 채점이 끝났으면 점수 · 피드백 -->
+            <div th:if="${submission != null and submission.graded}" class="alert alert-primary mb-4">
+                <div class="d-flex align-items-baseline">
+                    <span class="font-weight-bold mr-2">점수</span>
+                    <span class="h4 mb-0 font-weight-bold" th:text="${submission.score}">90</span>
+                    <span class="ml-1">/ <span th:text="${assignment.maxScore}">100</span>점</span>
+                    <span class="small text-gray-600 ml-auto">
+                        채점 <span class="date-cell" th:text="${#temporals.format(submission.gradedAt, 'yyyy-MM-dd HH:mm')}">2026-10-08 10:00</span>
+                    </span>
+                </div>
+                <div th:if="${submission.feedback != null}" class="mt-2 pt-2 border-top">
+                    <div class="small font-weight-bold mb-1">피드백</div>
+                    <div style="white-space: pre-wrap" th:text="${submission.feedback}">피드백</div>
+                </div>
+            </div>
+
+            <!-- 이미 제출한 내용 -->
+            <div th:if="${submission != null}" class="mb-4 pb-3 border-bottom">
+                <div class="small text-gray-500 mb-2">
+                    제출일시 <span class="date-cell" th:text="${#temporals.format(submission.submittedAt, 'yyyy-MM-dd HH:mm')}">2026-10-07 10:00</span>
+                </div>
+                <div class="text-gray-800" style="white-space: pre-wrap" th:text="${submission.content}">제출 내용</div>
+                <div th:if="${submission.filePath != null}" class="mt-2">
+                    <a th:href="@{/student/assignments/{id}/submission/file(id=${assignment.id})}" class="small">
+                        <i class="fas fa-paperclip fa-sm mr-1"></i><span th:text="${submission.fileName}">report.pdf</span>
+                    </a>
+                    <!-- 내가 낸 첨부 미리보기 — 올바른 파일을 냈는지 바로 확인 -->
+                    <th:block th:replace="~{fragments/file-preview :: filePreview(${preview},
+                            @{/student/assignments/{id}/submission/preview(id=${assignment.id})}, ${submission.fileName})}"></th:block>
+                </div>
+            </div>
+
+            <!-- 제출할 수 없을 때 이유 표시 + 폼 비활성화 (화면에서 막는 것은 편의 — 서버에서도 B1 · B4를 다시 검사) -->
+            <div th:if="${!canSubmit}" class="alert alert-secondary small mb-3">
+                <i class="fas fa-lock fa-sm mr-1"></i><span th:text="${blockedReason}">지금은 제출 기간이 아닙니다.</span>
+            </div>
+
+            <form th:action="@{/student/assignments/{id}/submission(id=${assignment.id})}" th:object="${submissionForm}"
+                  method="post" enctype="multipart/form-data" novalidate>
+                <fieldset th:disabled="${!canSubmit}">
+                    <div class="form-group">
+                        <label for="content" class="font-weight-bold"
+                               th:text="${submission == null} ? '제출 내용' : '다시 제출할 내용'">제출 내용</label>
+                        <textarea th:field="*{content}" class="form-control" th:errorclass="is-invalid" rows="6"
+                                  placeholder="과제 답안, 깃허브 링크 등을 입력하세요."></textarea>
+                        <div class="invalid-feedback" th:errors="*{content}"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="file" class="font-weight-bold">첨부파일 <span class="small text-gray-500">(선택 · 10MB 이하)</span></label>
+                        <div th:if="${submission != null and submission.filePath != null}" class="custom-control custom-checkbox mb-2">
+                            <input type="checkbox" class="custom-control-input" th:field="*{removeFile}">
+                            <label class="custom-control-label small" th:for="${#ids.prev('removeFile')}">
+                                기존 첨부(<span th:text="${submission.fileName}">report.pdf</span>) 삭제
+                            </label>
+                        </div>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="file" name="file"
+                                   th:classappend="${#fields.hasErrors('file')} ? 'is-invalid'"
+                                   accept=".pdf,.txt,.md,.doc,.docx,.hwp,.hwpx,.ppt,.pptx,.xls,.xlsx,.csv,.zip,.png,.jpg,.jpeg,.gif,.java">
+                            <label class="custom-file-label" for="file">파일 선택</label>
+                            <div class="invalid-feedback" th:errors="*{file}"></div>
+                        </div>
+                        <div th:if="${submission != null}" class="small text-gray-500 mt-1">
+                            새 파일을 선택하면 기존 첨부가 교체되고, 선택하지 않으면 기존 첨부가 유지됩니다.
+                        </div>
+                    </div>
+
+                    <div class="text-right">
+                        <button type="submit" class="btn btn-primary"
+                                th:text="${submission == null} ? '제출' : '다시 제출 (기존 제출 덮어쓰기)'">제출</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+    <script>
+        $('.custom-file-input').on('change', function () {
+            const name = this.files.length ? this.files[0].name : '파일 선택';
+            $(this).next('.custom-file-label').text(name);
+        });
+    </script>
+</th:block>
+</body>
+</html>

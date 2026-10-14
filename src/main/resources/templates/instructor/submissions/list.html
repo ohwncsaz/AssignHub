@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>제출 현황</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css">
+</head>
+<body>
+<div layout:fragment="content" th:with="a=${board.assignment}">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <div class="small text-gray-600 mb-1" th:text="${a.course.name}">강좌명</div>
+            <h1 class="h3 mb-1 text-gray-800">
+                <span th:text="${a.title}">과제 제목</span> <small class="text-gray-500">제출 현황</small>
+            </h1>
+            <div>
+                <th:block th:replace="~{fragments/assignment :: statusBadge(${a})}"></th:block>
+                <span class="small text-gray-500 ml-1">
+                    배점 <span th:text="${a.maxScore}">100</span>점 ·
+                    마감 <span class="date-cell" th:text="${#temporals.format(a.endAt, 'yyyy-MM-dd HH:mm')}">2026-10-14 23:59</span>
+                </span>
+            </div>
+        </div>
+        <a th:href="@{/instructor/courses/{id}(id=${a.course.id})}" class="btn btn-sm btn-outline-secondary mt-2 mt-sm-0">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 강좌로 돌아가기
+        </a>
+    </div>
+
+    <!-- 요약: 수강생 · 제출 · 미제출 · 채점 완료 -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">수강생</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800"><span th:text="${board.students}">0</span><small class="h6">명</small></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">제출</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800">
+                        <span id="submittedCount" th:text="${board.submitted}">0</span><small class="h6">명</small>
+                        <small class="h6 text-gray-500" th:text="|(${board.submittedRate}%)|">(0%)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">미제출</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800">
+                        <span id="notSubmittedCount" th:text="${board.notSubmitted}">0</span><small class="h6">명</small>
+                        <small class="h6 text-gray-500" th:if="${board.students > 0}"
+                               th:text="|(${100 - board.submittedRate}%)|">(0%)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">채점 완료</div>
+                    <div class="h4 mb-0 font-weight-bold text-gray-800">
+                        <span th:text="${board.graded}">0</span><small class="h6"> / <span th:text="${board.submitted}">0</span>건</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">수강생별 제출 현황</h6>
+            <!-- 상태 필터 (화면에서만 거르는 편의 기능) -->
+            <div class="btn-group btn-group-sm mt-2 mt-sm-0" role="group" id="statusFilter"
+                 th:unless="${#lists.isEmpty(board.rows)}">
+                <button type="button" class="btn btn-outline-primary active" data-filter="">전체</button>
+                <button type="button" class="btn btn-outline-danger" data-filter="미제출">미제출</button>
+                <button type="button" class="btn btn-outline-success" data-filter="채점 대기">채점 대기</button>
+                <button type="button" class="btn btn-outline-primary" data-filter="채점 완료">채점 완료</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div th:if="${#lists.isEmpty(board.rows)}" class="text-center text-gray-500 py-4">
+                아직 수강생이 없습니다.
+            </div>
+            <div class="table-responsive" th:unless="${#lists.isEmpty(board.rows)}">
+                <table class="table table-bordered" id="submissionTable" width="100%">
+                    <thead>
+                    <tr>
+                        <th>학번</th>
+                        <th>이름</th>
+                        <th>상태</th>
+                        <th>제출일시</th>
+                        <th>점수</th>
+                        <th>관리</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="r : ${board.rows}" th:classappend="${!r.submitted} ? 'table-danger'">
+                        <td th:text="${r.student.studentNo}">20260001</td>
+                        <td class="text-nowrap" th:text="${r.student.name}">홍길동</td>
+                        <!-- data-search: 필터 버튼이 정확히 비교할 값 (배지 HTML의 공백과 무관하게) -->
+                        <td class="text-nowrap"
+                            th:attr="data-search=${!r.submitted} ? '미제출' : (${r.submission.graded} ? '채점 완료' : '채점 대기')">
+                            <span th:if="${!r.submitted}" class="badge badge-danger">미제출</span>
+                            <span th:if="${r.submitted and !r.submission.graded}" class="badge badge-success">채점 대기</span>
+                            <span th:if="${r.submitted and r.submission.graded}" class="badge badge-primary">채점 완료</span>
+                        </td>
+                        <td class="date-cell small"
+                            th:text="${r.submitted} ? ${#temporals.format(r.submission.submittedAt, 'yyyy-MM-dd HH:mm')} : '-'">-</td>
+                        <td class="text-nowrap">
+                            <span th:if="${r.submitted and r.submission.graded}">
+                                <strong th:text="${r.submission.score}">90</strong> / <span th:text="${a.maxScore}">100</span>
+                            </span>
+                            <span th:unless="${r.submitted and r.submission.graded}" class="text-gray-400">-</span>
+                        </td>
+                        <td class="text-center">
+                            <a th:if="${r.submitted}" th:href="@{/instructor/submissions/{id}/grade(id=${r.submission.id})}"
+                               class="btn btn-sm"
+                               th:classappend="${r.submission.graded} ? 'btn-outline-primary' : 'btn-primary'"
+                               th:text="${r.submission.graded} ? '다시 채점' : '채점'">채점</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<th:block layout:fragment="scripts">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+    <!-- th:inline="none": DataTables 옵션의 이중 대괄호를 Thymeleaf가 해석하지 않도록 -->
+    <script th:inline="none">
+        $(function () {
+            const table = $('#submissionTable').DataTable({
+                autoWidth: false,
+                order: [[0, 'asc']],
+                language: {
+                    search: '검색:',
+                    lengthMenu: '_MENU_ 명씩 보기',
+                    info: '전체 _TOTAL_명 중 _START_-_END_',
+                    infoEmpty: '0명',
+                    infoFiltered: '(전체 _MAX_명 중 검색)',
+                    zeroRecords: '해당하는 학생이 없습니다.',
+                    paginate: {previous: '이전', next: '다음'}
+                }
+            });
+            // 상태 열(3번째)을 정확히 일치하는 값으로 거르기
+            $('#statusFilter button').on('click', function () {
+                const value = $(this).data('filter');
+                $('#statusFilter button').removeClass('active');
+                $(this).addClass('active');
+                table.column(2).search(value ? '^' + value + '$' : '', true, false).draw();
+            });
+        });
+    </script>
+</th:block>
+</body>
+</html>

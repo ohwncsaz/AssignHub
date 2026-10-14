@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/auth}">
+<head>
+    <title>학생 회원가입</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row justify-content-center">
+        <div class="col-xl-6 col-lg-7 col-md-9">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-5">
+                    <div class="text-center">
+                        <h1 class="h4 text-gray-900 mb-2">학생 회원가입</h1>
+                        <p class="small text-gray-600 mb-4">강사 계정은 회원가입으로 만들 수 없습니다.</p>
+                    </div>
+
+                    <form class="user" th:action="@{/signup}" th:object="${signupForm}" method="post" novalidate>
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <input type="text" th:field="*{studentNo}" class="form-control form-control-user"
+                                       th:errorclass="is-invalid" placeholder="학번" inputmode="numeric">
+                                <div class="invalid-feedback" th:errors="*{studentNo}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" th:field="*{name}" class="form-control form-control-user"
+                                       th:errorclass="is-invalid" placeholder="이름">
+                                <div class="invalid-feedback" th:errors="*{name}"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" th:field="*{email}" class="form-control form-control-user"
+                                   th:errorclass="is-invalid" placeholder="이메일">
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <input type="password" th:field="*{password}" class="form-control form-control-user"
+                                       th:errorclass="is-invalid" placeholder="비밀번호 (8자 이상)">
+                                <div class="invalid-feedback" th:errors="*{password}"></div>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="password" th:field="*{passwordConfirm}"
+                                       class="form-control form-control-user"
+                                       th:errorclass="is-invalid" placeholder="비밀번호 확인">
+                                <div class="invalid-feedback" th:errors="*{passwordConfirm}"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-user btn-block">회원가입</button>
+                    </form>
+
+                    <hr>
+                    <div class="text-center">
+                        <a class="small" th:href="@{/login}">이미 계정이 있나요? 로그인</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

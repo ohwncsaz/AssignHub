@@ -13,6 +13,11 @@ java {
 	}
 }
 
+// 배포 서버(appfactory)가 Java 17이라 결과물은 17용으로 컴파일 — JDK 21로 빌드하되 17 API만 쓰도록 검사된다
+tasks.withType(JavaCompile).configureEach {
+	options.release = 17
+}
+
 repositories {
 	mavenCentral()
 }
@@ -25,6 +30,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+	// 학생 대량 추가: 엑셀(.xlsx) 읽기·양식 생성
+	implementation 'org.apache.poi:poi-ooxml:5.5.1'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'org.postgresql:postgresql'

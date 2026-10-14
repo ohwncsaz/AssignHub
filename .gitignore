@@ -35,3 +35,12 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Office 임시 파일 ###
+~$*
+
+### 첨부파일 업로드 폴더 ###
+uploads/
+
+### 배포용 DB 접속 정보 (비밀번호 포함) ###
+application-secret.yaml

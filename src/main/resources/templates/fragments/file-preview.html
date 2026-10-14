@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<!-- 첨부파일 미리보기 (FilePreview.Preview) — 강사 채점 화면, 학생 "내 제출"에서 사용 -->
+<!-- previewUrl: 이미지 · PDF를 inline으로 내려주는 주소 / 텍스트는 서버에서 읽은 내용을 th:text로 출력(이스케이프) -->
+<th:block th:fragment="filePreview(preview, previewUrl, fileName)">
+    <div class="mt-3" th:if="${preview != null}" th:with="type=${preview.type.name()}">
+        <div class="small font-weight-bold text-gray-700 mb-2">
+            <i class="fas fa-eye fa-sm mr-1"></i>미리보기
+            <span class="font-weight-normal text-gray-500" th:text="${fileName}">report.pdf</span>
+        </div>
+
+        <img th:if="${type == 'IMAGE'}" th:src="${previewUrl}" class="img-fluid border rounded"
+             style="max-height: 600px" alt="첨부 이미지 미리보기">
+
+        <iframe th:if="${type == 'PDF'}" th:src="${previewUrl}" class="w-100 border rounded"
+                style="height: 600px" title="PDF 미리보기"></iframe>
+
+        <th:block th:if="${type == 'TEXT'}">
+            <pre class="preview-text border rounded p-3 bg-light small mb-1" th:text="${preview.text}">파일 내용</pre>
+            <div th:if="${preview.truncated}" class="small text-gray-500">
+                파일이 커서 앞부분(200KB)만 표시했습니다. 전체 내용은 파일을 내려받아 확인하세요.
+            </div>
+        </th:block>
+
+        <div th:if="${type == 'NONE'}" class="small text-gray-600 border rounded p-3 bg-light">
+            <i class="fas fa-info-circle fa-sm mr-1"></i>
+            이 형식(hwp · docx · pptx · xlsx · zip 등)은 브라우저에서 미리보기를 지원하지 않습니다. 파일을 내려받아 확인하세요.
+        </div>
+    </div>
+</th:block>
+
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>학생 추가</title>
+</head>
+<body>
+<div layout:fragment="content">
+
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800">학생 추가</h1>
+            <div class="small text-gray-600" th:text="${course.name}">강좌명</div>
+        </div>
+        <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-arrow-left fa-sm mr-1"></i> 강좌로 돌아가기
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <form th:action="@{/instructor/courses/{id}/students(id=${course.id})}" th:object="${studentAddForm}"
+                          method="post" novalidate>
+                        <div class="form-group">
+                            <label for="studentNo" class="font-weight-bold">학번</label>
+                            <input type="text" th:field="*{studentNo}" class="form-control" th:errorclass="is-invalid"
+                                   inputmode="numeric" maxlength="20" placeholder="예: 20260001">
+                            <div class="invalid-feedback" th:errors="*{studentNo}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold">이름</label>
+                            <input type="text" th:field="*{name}" class="form-control" th:errorclass="is-invalid"
+                                   maxlength="50">
+                            <div class="invalid-feedback" th:errors="*{name}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="font-weight-bold">이메일</label>
+                            <input type="email" th:field="*{email}" class="form-control" th:errorclass="is-invalid"
+                                   maxlength="100">
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+                        <div class="text-right">
+                            <a th:href="@{/instructor/courses/{id}(id=${course.id})}" class="btn btn-secondary">취소</a>
+                            <button type="submit" class="btn btn-info">추가</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card border-left-info shadow mb-4">
+                <div class="card-body small text-gray-700">
+                    <div class="font-weight-bold text-info mb-2">이렇게 처리됩니다</div>
+                    <ul class="pl-3 mb-0">
+                        <li class="mb-1"><strong>이미 가입한 학생</strong>(같은 학번)은 기존 계정으로 강좌에 등록됩니다.</li>
+                        <li class="mb-1"><strong>가입하지 않은 학생</strong>은 계정을 새로 만들고 등록합니다.
+                            초기 비밀번호는 <strong>학번</strong>이며, 학생은 첫 로그인 때 비밀번호를 바꿔야 합니다.</li>
+                        <li>여러 명은 <a th:href="@{/instructor/courses/{id}/students/import(id=${course.id})}">엑셀로 추가</a>를 이용하세요.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
