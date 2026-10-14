@@ -54,23 +54,50 @@ class ProfileTest {
     }
 
     @Test
-    @DisplayName("학생은 이름·이메일·학번을 수정할 수 있다 (이메일은 소문자로 저장)")
+    @DisplayName("학생은 이름·이메일을 수정할 수 있다 (이메일은 소문자로 저장, 학번은 그대로)")
     void updateProfile_student() {
-        userService.updateProfile(student.getId(), profile("새이름", "New@Test.com", "20269999"));
+        userService.updateProfile(student.getId(), profile("새이름", "New@Test.com", "20260001"));
 
         User updated = userRepository.findById(student.getId()).orElseThrow();
         assertThat(updated.getName()).isEqualTo("새이름");
         assertThat(updated.getEmail()).isEqualTo("new@test.com");
-        assertThat(updated.getStudentNo()).isEqualTo("20269999");
+        assertThat(updated.getStudentNo()).isEqualTo("20260001");
     }
 
     @Test
-    @DisplayName("다른 사용자가 쓰는 이메일·학번으로는 바꿀 수 없다")
-    void updateProfile_duplicates() {
+    @DisplayName("다른 사용자가 쓰는 이메일로는 바꿀 수 없다")
+    void updateProfile_duplicateEmail() {
         assertThatThrownBy(() -> userService.updateProfile(student.getId(), profile("학생1", "TAKEN@test.com", "20260001")))
                 .isInstanceOf(FormFieldException.class).extracting("field").isEqualTo("email");
-        assertThatThrownBy(() -> userService.updateProfile(student.getId(), profile("학생1", "s1@test.com", "20260002")))
-                .isInstanceOf(FormFieldException.class).extracting("field").isEqualTo("studentNo");
+    }
+
+    @Test
+    @DisplayName("학생이 학번을 바꾸거나 비우면 '권한이 없습니다'로 거부되고, 이름·이메일도 저장되지 않는다")
+    void updateProfile_studentNoChangeForbidden() {
+        assertThatThrownBy(() -> userService.updateProfile(student.getId(), profile("새이름", "s1@test.com", "20269999")))
+                .isInstanceOf(FormFieldException.class)
+                .hasMessageContaining("권한이 없습니다")
+                .extracting("field").isEqualTo("studentNo");
+        assertThatThrownBy(() -> userService.updateProfile(student.getId(), profile("새이름", "s1@test.com", "")))
+                .isInstanceOf(FormFieldException.class).hasMessageContaining("권한이 없습니다");
+
+        User saved = userRepository.findById(student.getId()).orElseThrow();
+        assertThat(saved.getStudentNo()).isEqualTo("20260001");
+        assertThat(saved.getName()).isEqualTo("학생1");
+    }
+
+    @Test
+    @DisplayName("프로필 화면에서 학번을 바꿔 저장하면 학번 칸에 '권한이 없습니다'가 표시된다")
+    void updateProfile_studentNoChangeShowsError() throws Exception {
+        mockMvc.perform(post("/profile").with(user(new LoginUser(student))).with(csrf())
+                        .param("name", "학생1")
+                        .param("email", "s1@test.com")
+                        .param("studentNo", "20269999"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeHasFieldErrors("profileForm", "studentNo"))
+                .andExpect(content().string(Matchers.containsString("권한이 없습니다. 학번은 수정할 수 없습니다.")));
+
+        assertThat(userRepository.findById(student.getId()).orElseThrow().getStudentNo()).isEqualTo("20260001");
     }
 
     @Test

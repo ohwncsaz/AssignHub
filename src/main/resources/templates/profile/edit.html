@@ -26,6 +26,7 @@
                             <input type="text" th:field="*{studentNo}" class="form-control" th:errorclass="is-invalid"
                                    inputmode="numeric" maxlength="20">
                             <div class="invalid-feedback" th:errors="*{studentNo}"></div>
+                            <small class="form-text text-gray-500" th:unless="${#fields.hasErrors('studentNo')}">학번은 수정할 수 없습니다.</small>
                         </div>
                         <div class="form-group">
                             <label for="name" class="font-weight-bold">이름</label>
