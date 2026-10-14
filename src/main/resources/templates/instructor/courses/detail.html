@@ -16,9 +16,18 @@
                 개설 <span th:text="${#temporals.format(course.createdAt, 'yyyy-MM-dd HH:mm')}">2026-09-30 10:00</span>
             </div>
         </div>
-        <a th:href="@{/instructor/courses}" class="btn btn-sm btn-outline-secondary mt-2 mt-sm-0">
-            <i class="fas fa-arrow-left fa-sm mr-1"></i> 강좌 목록
-        </a>
+        <div class="d-flex mt-2 mt-sm-0">
+            <a th:href="@{/instructor/courses}" class="btn btn-sm btn-outline-secondary mr-2">
+                <i class="fas fa-arrow-left fa-sm mr-1"></i> 강좌 목록
+            </a>
+            <!-- 강좌 삭제 — 제출물이 있으면 서버에서 막힘. 강좌명은 data 속성으로 넘겨 스크립트에 직접 넣지 않음 -->
+            <form th:action="@{/instructor/courses/{id}/delete(id=${course.id})}" method="post" th:data-name="${course.name}"
+                  onsubmit="return confirm('[' + this.dataset.name + '] 강좌를 삭제할까요? 과제와 수강 등록이 함께 삭제되며 되돌릴 수 없습니다.');">
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt fa-sm mr-1"></i> 강좌 삭제
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- 요약: 참여코드 · 수강생 수 · 과제 수 · 평균 제출률 -->

@@ -23,6 +23,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     boolean existsByAssignmentId(Long assignmentId);
 
+    // 강좌 삭제 검사 — 강좌의 과제 중 하나라도 제출물이 있는지
+    boolean existsByAssignmentCourseId(Long courseId);
+
     // B6 유지 — 이미 준 최고 점수보다 배점을 낮출 수 없게 (채점된 것이 없으면 null)
     @Query("select max(s.score) from Submission s where s.assignment.id = :assignmentId")
     Integer findMaxScoreByAssignmentId(@Param("assignmentId") Long assignmentId);

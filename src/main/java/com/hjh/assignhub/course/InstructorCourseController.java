@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.hjh.assignhub.auth.LoginUser;
+import com.hjh.assignhub.common.BusinessException;
 import com.hjh.assignhub.course.CourseOverviewService.AssignmentProgress;
 import com.hjh.assignhub.enrollment.Enrollment;
 import com.hjh.assignhub.enrollment.EnrollmentService;
@@ -73,5 +74,18 @@ public class InstructorCourseController {
         redirectAttributes.addFlashAttribute("successMessage",
                 "참여코드를 " + joinCode + "(으)로 재발급했습니다. 이전 코드로는 더 이상 수강 등록할 수 없습니다.");
         return "redirect:/instructor/courses/" + id;
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@AuthenticationPrincipal LoginUser loginUser, @PathVariable Long id,
+                         RedirectAttributes redirectAttributes) {
+        try {
+            String name = courseService.delete(id, loginUser.getId());
+            redirectAttributes.addFlashAttribute("successMessage", "강좌 [" + name + "]을(를) 삭제했습니다.");
+            return "redirect:/instructor/courses";
+        } catch (BusinessException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/instructor/courses/" + id;
+        }
     }
 }
