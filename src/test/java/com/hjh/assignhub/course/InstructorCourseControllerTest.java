@@ -6,10 +6,14 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.time.LocalDateTime;
 
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,9 +25,13 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hjh.assignhub.assignment.Assignment;
+import com.hjh.assignhub.assignment.AssignmentRepository;
 import com.hjh.assignhub.auth.LoginUser;
 import com.hjh.assignhub.enrollment.Enrollment;
 import com.hjh.assignhub.enrollment.EnrollmentRepository;
+import com.hjh.assignhub.submission.Submission;
+import com.hjh.assignhub.submission.SubmissionRepository;
 import com.hjh.assignhub.user.User;
 import com.hjh.assignhub.user.UserRepository;
 
@@ -46,6 +54,12 @@ class InstructorCourseControllerTest {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+
+    @Autowired
+    private AssignmentRepository assignmentRepository;
+
+    @Autowired
+    private SubmissionRepository submissionRepository;
 
     private LoginUser instructor;
     private LoginUser otherInstructor;
@@ -130,6 +144,65 @@ class InstructorCourseControllerTest {
         mockMvc.perform(get("/instructor/courses/{id}", courseId).with(user(instructor)))
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.containsString("아직 등록한 학생이 없습니다.")));
+    }
+
+    @Test
+    @DisplayName("강좌 삭제: 제출물이 없으면 과제 · 수강 등록과 함께 삭제되고 학생 계정은 남는다")
+    void delete_withoutSubmissions() throws Exception {
+        Long courseId = courseService.create(instructor.getId(), form("지울 강좌"));
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        User student = userRepository.save(User.createStudent("s1@test.com", "pw", "학생1", "20260001"));
+        enrollmentRepository.save(new Enrollment(course, student));
+        assignmentRepository.save(new Assignment(course, "과제", "내용",
+                LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1), 100, null));
+
+        mockMvc.perform(post("/instructor/courses/{id}/delete", courseId).with(user(instructor)).with(csrf()))
+                .andExpect(redirectedUrl("/instructor/courses"))
+                .andExpect(flash().attributeExists("successMessage"));
+
+        assertThat(courseRepository.findById(courseId)).isEmpty();
+        assertThat(assignmentRepository.findByCourseIdOrderByCreatedAtDesc(courseId)).isEmpty();
+        assertThat(enrollmentRepository.findStudentsOfCourse(courseId)).isEmpty();
+        assertThat(userRepository.findById(student.getId())).isPresent();
+    }
+
+    @Test
+    @DisplayName("강좌 삭제: 제출물이 1건이라도 있으면 삭제되지 않고 알림을 띄운다 (B8과 같은 기준)")
+    void delete_blockedWhenSubmitted() throws Exception {
+        Long courseId = courseService.create(instructor.getId(), form("제출 있는 강좌"));
+        Course course = courseRepository.findById(courseId).orElseThrow();
+        User student = userRepository.save(User.createStudent("s1@test.com", "pw", "학생1", "20260001"));
+        enrollmentRepository.save(new Enrollment(course, student));
+        Assignment assignment = assignmentRepository.save(new Assignment(course, "과제", "내용",
+                LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1), 100, null));
+        submissionRepository.save(new Submission(assignment, student, "답안", null));
+
+        mockMvc.perform(post("/instructor/courses/{id}/delete", courseId).with(user(instructor)).with(csrf()))
+                .andExpect(redirectedUrl("/instructor/courses/" + courseId))
+                .andExpect(flash().attribute("errorMessage", "제출물이 있는 강좌는 삭제할 수 없습니다."));
+
+        assertThat(courseRepository.findById(courseId)).isPresent();
+    }
+
+    @Test
+    @DisplayName("강좌 삭제: 다른 강사의 강좌는 403 (B5)")
+    void delete_otherInstructorForbidden() throws Exception {
+        Long courseId = courseService.create(instructor.getId(), form("남의 강좌"));
+
+        mockMvc.perform(post("/instructor/courses/{id}/delete", courseId).with(user(otherInstructor)).with(csrf()))
+                .andExpect(status().isForbidden());
+
+        assertThat(courseRepository.findById(courseId)).isPresent();
+    }
+
+    @Test
+    @DisplayName("강좌 상세에 강좌 삭제 버튼이 있고, 강좌명은 확인창 스크립트에 직접 들어가지 않는다")
+    void detail_hasDeleteButton() throws Exception {
+        Long courseId = courseService.create(instructor.getId(), form("');alert(1);//"));
+
+        mockMvc.perform(get("/instructor/courses/{id}", courseId).with(user(instructor)))
+                .andExpect(content().string(Matchers.containsString("/instructor/courses/" + courseId + "/delete")))
+                .andExpect(content().string(Matchers.not(Matchers.containsString("');alert(1);//"))));
     }
 
     private CourseForm form(String name) {
