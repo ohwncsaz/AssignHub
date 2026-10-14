@@ -2,7 +2,6 @@ package com.hjh.assignhub.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +21,7 @@ public class ProfileForm {
     private String email;
 
     // 학생만 사용 (강사 화면에는 입력칸이 없어 null로 들어온다)
-    @Pattern(regexp = "\\d{4,20}", message = "학번은 숫자 4~20자리로 입력하세요.")
+    // 형식 검사는 하지 않는다 — 기존 학번과 다르면 형식과 관계없이 Service에서 "권한이 없습니다"로 막는다
     private String studentNo;
 
     public static ProfileForm from(User user) {

@@ -76,13 +76,10 @@ public class User {
         return role == Role.STUDENT;
     }
 
-    // 프로필 수정 — 강사는 학번이 없으므로 학생일 때만 학번을 바꾼다
-    public void updateProfile(String name, String email, String studentNo) {
+    // 프로필 수정 — 이름·이메일만 바꾼다 (학번은 수정 불가)
+    public void updateProfile(String name, String email) {
         this.name = name;
         this.email = email;
-        if (isStudent()) {
-            this.studentNo = studentNo;
-        }
     }
 
     public void changeProfileImage(String profileImagePath) {

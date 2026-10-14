@@ -46,27 +46,24 @@ public class UserService {
         return userRepository.findById(userId).orElseThrow();
     }
 
-    // 프로필 수정 — 이메일·학번은 다른 사용자와 중복 불가
+    // 프로필 수정 — 이메일은 다른 사용자와 중복 불가, 학번은 학생이 직접 바꿀 수 없다
     @Transactional
     public User updateProfile(Long userId, ProfileForm form) {
         User user = getUser(userId);
         String email = normalizeEmail(form.getEmail());
-        String studentNo = null;
 
         if (!email.equals(user.getEmail()) && userRepository.existsByEmail(email)) {
             throw new FormFieldException("email", "이미 사용 중인 이메일입니다.");
         }
+        // 학번은 성적·수강 기록을 식별하는 값이라 학생 본인이 수정할 수 없다 (요청을 조작해 보내도 서버에서 막음)
         if (user.isStudent()) {
-            if (form.getStudentNo() == null || form.getStudentNo().isBlank()) {
-                throw new FormFieldException("studentNo", "학번을 입력하세요.");
-            }
-            studentNo = form.getStudentNo().trim();
-            if (!studentNo.equals(user.getStudentNo()) && userRepository.existsByStudentNo(studentNo)) {
-                throw new FormFieldException("studentNo", "이미 사용 중인 학번입니다.");
+            String studentNo = form.getStudentNo() == null ? "" : form.getStudentNo().trim();
+            if (!studentNo.equals(user.getStudentNo())) {
+                throw new FormFieldException("studentNo", "권한이 없습니다. 학번은 수정할 수 없습니다.");
             }
         }
 
-        user.updateProfile(form.getName().trim(), email, studentNo);
+        user.updateProfile(form.getName().trim(), email);
         return user;
     }
 
