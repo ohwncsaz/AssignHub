@@ -13,6 +13,11 @@ java {
 	}
 }
 
+// 배포 서버(appfactory)가 Java 17이라 결과물은 17용으로 컴파일 — JDK 21로 빌드하되 17 API만 쓰도록 검사된다
+tasks.withType(JavaCompile).configureEach {
+	options.release = 17
+}
+
 repositories {
 	mavenCentral()
 }
